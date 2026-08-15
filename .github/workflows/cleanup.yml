@@ -21,14 +21,25 @@ jobs:
           ruby-version: .ruby-version
 
       - name: Install Kamal
-        run: gem install kamal -v 2.12.0
+        run: gem install kamal -v 2.12.0 --no-document
 
-      - name: Set up SSH Private Key
+      - name: Configure High-Speed SSH with Connection Multiplexing
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H "${{ secrets.SERVER_IP || '34.27.174.205' }}" >> ~/.ssh/known_hosts
+          cat << 'EOF' > ~/.ssh/config
+          Host *
+            StrictHostKeyChecking accept-new
+            ControlMaster auto
+            ControlPath ~/.ssh/control-%C
+            ControlPersist 10m
+            ServerAliveInterval 60
+            ServerAliveCountMax 3
+            Compression yes
+          EOF
+          chmod 600 ~/.ssh/config
+          ssh-keyscan -H "${{ secrets.SERVER_IP || '34.27.174.205' }}" >> ~/.ssh/known_hosts 2>/dev/null || true
 
       - name: Run Kamal Prune
         env:
