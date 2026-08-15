@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # check=error=true
 
-# This Dockerfile is designed for production, not development. Use with Kamal or build'n'run by hand:
+# This Dockerfile is designed for production, not development.
 ARG RUBY_VERSION=3.4.10
 FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
 
@@ -31,15 +31,14 @@ COPY vendor/* ./vendor/
 COPY Gemfile Gemfile.lock ./
 RUN --mount=type=cache,target=/root/.bundle/cache \
     bundle install && \
-    rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
+    rm -rf "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
     bundle exec bootsnap precompile --gemfile
 
 # Copy application code
 COPY . .
 
-# Precompile bootsnap & assets with BuildKit cache
-RUN --mount=type=cache,target=/rails/tmp/cache \
-    bundle exec bootsnap precompile app/ lib/ && \
+# Precompile bootsnap & assets
+RUN bundle exec bootsnap precompile app/ lib/ && \
     SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 
 # Final stage for app image
