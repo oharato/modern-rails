@@ -36,8 +36,7 @@
 /app/assets/builds/*
 !/app/assets/builds/.keep
 
-# Kamal secrets
-/.kamal/secrets
+
 
 # Pulumi & Node
 infra/node_modules/
