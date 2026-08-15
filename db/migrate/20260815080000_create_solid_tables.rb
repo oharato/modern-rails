@@ -93,6 +93,7 @@ class CreateSolidTables < ActiveRecord::Migration[8.0]
 
     create_table :solid_queue_processes do |t|
       t.string :name, null: false
+      t.string :kind, null: false, default: "Worker"
       t.datetime :last_heartbeat_at, null: false
       t.bigint :supervisor_id
       t.integer :pid, null: false
