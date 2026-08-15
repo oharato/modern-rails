@@ -2,6 +2,8 @@
 
 最新の **Ruby on Rails 8**、**PostgreSQL 17**、**Docker Compose** を用いたモダンなフルスタックWebアプリケーション環境です。
 
+> 📖 **インフラ構築（Pulumi）および本番デプロイ（Kamal 2）の手順は [DEPLOYMENT.md](file:///home/oharato/workspace/modern-rails/DEPLOYMENT.md) にまとめています。**
+
 ---
 
 ## 🚀 採用技術スタック & バージョン

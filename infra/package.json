@@ -1,0 +1,14 @@
+{
+  "name": "modern-rails-infra",
+  "version": "1.0.0",
+  "description": "GCP infrastructure for Modern Rails 8 with Pulumi and Kamal",
+  "main": "index.ts",
+  "dependencies": {
+    "@pulumi/gcp": "^8.18.0",
+    "@pulumi/pulumi": "^3.150.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  }
+}

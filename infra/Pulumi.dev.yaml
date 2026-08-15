@@ -1,0 +1,6 @@
+encryptionsalt: v1:B/NCUKEAKz0=:v1:7DghXEsuNKsowWlz:hg44G2LTfXXkM1577Emr9fK20JyJqQ==
+config:
+  gcp:project: modern-rails-1786791154
+  gcp:region: us-central1
+  gcp:zone: us-central1-a
+  modern-rails-infra:machineType: e2-micro

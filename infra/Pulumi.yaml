@@ -1,0 +1,3 @@
+name: modern-rails-infra
+runtime: nodejs
+description: GCP Infrastructure for Modern Rails 8 with Kamal
