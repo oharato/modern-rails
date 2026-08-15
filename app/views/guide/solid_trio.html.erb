@@ -101,49 +101,102 @@
     </div>
 
     <!-- How it works -->
-    <div class="space-y-4">
-      <h3 class="font-bold text-slate-800 text-base">🔍 どのように動作するのか？（内部メカニズム）</h3>
-      <p class="text-sm text-slate-600 leading-relaxed">
-        Solid Queue は、ジョブのライフサイクルごとに専用の DB テーブル（スキーマ）を使い分けています。
-      </p>
+    <div class="space-y-6">
+      <div>
+        <h3 class="font-bold text-slate-800 text-base">🔍 なぜ 1 つのテーブルではなく複数テーブルに分けるのか？（設計思想）</h3>
+        <p class="text-sm text-slate-600 leading-relaxed mt-1">
+          多くの人が「<code>jobs</code> テーブル 1 つに <code>status: 'ready' / 'running' / 'completed'</code> 列を持てば良いのでは？」と考えます。<br>
+          しかし、数百万件の過去ジョブが溜まる巨大テーブルに対して毎秒ポーリングをかけると、<strong>インデックスが肥大化し、キャッシュ効率が落ち、行ロックの競合で DB が重くなる</strong> という致命的な問題が発生します。
+        </p>
+        <div class="p-4 bg-indigo-50/70 rounded-xl border border-indigo-100 mt-3 text-xs text-indigo-900 leading-relaxed">
+          💡 <strong>Solid Queue の神髄：</strong><br>
+          「実行待ち（Ready）」や「実行中（Claimed）」のテーブルは、<strong>常に現在動いている数件〜数十件のレコードしか存在しない</strong> ように保たれます。そのためテーブルサイズが極小となり、<strong>全データが DB のメモリ（Buffer Cache）に 100% 乗った状態で秒間数万回の高速ポーリング</strong> が可能になります。
+        </div>
+      </div>
 
-      <div class="overflow-x-auto">
-        <table class="min-w-full text-xs divide-y divide-slate-200 border border-slate-100 rounded-lg">
-          <thead class="bg-slate-50 text-slate-700 font-semibold">
-            <tr>
-              <th class="px-4 py-2.5 text-left">テーブル名</th>
-              <th class="px-4 py-2.5 text-left">役割</th>
-              <th class="px-4 py-2.5 text-left">特徴・処理内容</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100 text-slate-600 font-mono">
-            <tr>
-              <td class="px-4 py-2.5 font-bold text-indigo-600">solid_queue_jobs</td>
-              <td class="px-4 py-2.5 font-sans">全ジョブのマスター定義</td>
-              <td class="px-4 py-2.5 font-sans">引数（JSON）、クラス名、キュー名、優先度を保持</td>
-            </tr>
-            <tr>
-              <td class="px-4 py-2.5 font-bold text-emerald-600">solid_queue_ready_executions</td>
-              <td class="px-4 py-2.5 font-sans">実行待ち（Ready）キュー</td>
-              <td class="px-4 py-2.5 font-sans">ワーカーがポーリングして取得するテーブル（最小限の列のみで高速）</td>
-            </tr>
-            <tr>
-              <td class="px-4 py-2.5 font-bold text-amber-600">solid_queue_scheduled_executions</td>
-              <td class="px-4 py-2.5 font-sans">スケジュール（遅延）ジョブ</td>
-              <td class="px-4 py-2.5 font-sans"><code>perform_in(10.minutes)</code> などの未来実行ジョブを管理</td>
-            </tr>
-            <tr>
-              <td class="px-4 py-2.5 font-bold text-purple-600">solid_queue_claimed_executions</td>
-              <td class="px-4 py-2.5 font-sans">実行中（In-Flight）ジョブ</td>
-              <td class="px-4 py-2.5 font-sans">ワーカープロセスが確保中のジョブ（ハートビート監視付き）</td>
-            </tr>
-            <tr>
-              <td class="px-4 py-2.5 font-bold text-rose-600">solid_queue_failed_executions</td>
-              <td class="px-4 py-2.5 font-sans">失敗ジョブ</td>
-              <td class="px-4 py-2.5 font-sans">エラー内容・スタックトレースを保存（リトライ可能）</td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- Table Roles Table -->
+      <div>
+        <h4 class="font-bold text-slate-800 text-sm mb-2">📋 各テーブルの役割分担</h4>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-xs divide-y divide-slate-200 border border-slate-100 rounded-lg">
+            <thead class="bg-slate-50 text-slate-700 font-semibold">
+              <tr>
+                <th class="px-4 py-2.5 text-left">テーブル名</th>
+                <th class="px-4 py-2.5 text-left">役割</th>
+                <th class="px-4 py-2.5 text-left">特徴・保持されるデータ</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-slate-600 font-mono">
+              <tr>
+                <td class="px-4 py-2.5 font-bold text-indigo-600">solid_queue_jobs</td>
+                <td class="px-4 py-2.5 font-sans font-semibold">マスター台帳（永続）</td>
+                <td class="px-4 py-2.5 font-sans">引数（JSON）、クラス名、キュー名、優先度、作成日時、完了日時を記録。</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2.5 font-bold text-emerald-600">solid_queue_ready_executions</td>
+                <td class="px-4 py-2.5 font-sans font-semibold">実行待ち（Ready）</td>
+                <td class="px-4 py-2.5 font-sans">「今すぐ実行可能」なジョブのポインタ（<code>job_id</code>, <code>queue_name</code>, <code>priority</code>）。ワーカーが監視。</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2.5 font-bold text-amber-600">solid_queue_scheduled_executions</td>
+                <td class="px-4 py-2.5 font-sans font-semibold">スケジュール（遅延待ち）</td>
+                <td class="px-4 py-2.5 font-sans"><code>set(wait: 10.minutes)</code> などの未来ジョブ。時間が来たら Dispatcher が Ready へ移動。</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2.5 font-bold text-purple-600">solid_queue_claimed_executions</td>
+                <td class="px-4 py-2.5 font-sans font-semibold">実行中（In-Flight）</td>
+                <td class="px-4 py-2.5 font-sans">ワーカーが掴んで処理中のジョブ（<code>job_id</code>, <code>process_id</code>）。ワーカーの生存監視対象。</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2.5 font-bold text-blue-600">solid_queue_blocked_executions</td>
+                <td class="px-4 py-2.5 font-sans font-semibold">ブロック中（並行制限）</td>
+                <td class="px-4 py-2.5 font-sans"><code>limits_concurrency</code> で「同一ユーザーの処理は1件ずつ」などの制限で待機中のジョブ。</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2.5 font-bold text-rose-600">solid_queue_failed_executions</td>
+                <td class="px-4 py-2.5 font-sans font-semibold">失敗（Failed）</td>
+                <td class="px-4 py-2.5 font-sans">例外で規定回数失敗したジョブとスタックトレース。管理画面から再試行可能。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Lifecycle Diagram & Step-by-Step Flow -->
+      <div class="p-6 bg-slate-900 text-slate-100 rounded-2xl space-y-4 border border-slate-800">
+        <h4 class="text-sm font-bold text-white flex items-center gap-2">
+          <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-purple-500 text-white">LIFECYCLE</span>
+          ジョブのデータ状態遷移フロー（完全図解）
+        </h4>
+
+        <div class="space-y-3 text-xs font-mono">
+          <!-- Step 1 -->
+          <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-1">
+            <div class="text-indigo-400 font-bold font-sans">STEP 1: ジョブのエンキュー（MyJob.perform_later）</div>
+            <div class="text-slate-300">① <span class="text-indigo-300">solid_queue_jobs</span> にマスターレコードが 1 件 INSERT される</div>
+            <div class="text-slate-400 pl-4">├ 即時実行の場合 ───&gt; <span class="text-emerald-400">solid_queue_ready_executions</span> に即座にポインタ INSERT</div>
+            <div class="text-slate-400 pl-4">├ 遅延実行の場合 ───&gt; <span class="text-amber-400">solid_queue_scheduled_executions</span> に INSERT（時間が来たら Dispatcher が ready へ移動）</div>
+            <div class="text-slate-400 pl-4">└ 並行制限がある場合 ─&gt; <span class="text-blue-400">solid_queue_blocked_executions</span> に INSERT（先行ジョブ終了時に ready へ移動）</div>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-1">
+            <div class="text-emerald-400 font-bold font-sans">STEP 2: ワーカーがジョブを取得して実行開始</div>
+            <div class="text-slate-300">② ワーカーが <span class="text-emerald-400">solid_queue_ready_executions</span> を <code>FOR UPDATE SKIP LOCKED</code> で取得</div>
+            <div class="text-slate-300">③ <span class="text-emerald-400">ready_executions</span> からレコードが <strong>DELETE</strong> され、<span class="text-purple-400">solid_queue_claimed_executions</span> に <strong>INSERT</strong>（実行中マーク）</div>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-1">
+            <div class="text-purple-400 font-bold font-sans">STEP 3: 実行結果の処理（成功 or 失敗）</div>
+            <div class="text-slate-300 font-sans font-semibold text-emerald-300">【A. 正常終了した場合】</div>
+            <div class="text-slate-400 pl-4">├ <span class="text-purple-400">solid_queue_claimed_executions</span> からレコードを <strong>DELETE</strong></div>
+            <div class="text-slate-400 pl-4">└ <span class="text-indigo-300">solid_queue_jobs</span> の <code>finished_at</code> に完了時刻を UPDATE（後から自動クリーンアップ）</div>
+            <div class="text-slate-300 font-sans font-semibold text-rose-300 pt-1">【B. エラー・例外が発生した場合】</div>
+            <div class="text-slate-400 pl-4">├ <span class="text-purple-400">solid_queue_claimed_executions</span> からレコードを <strong>DELETE</strong></div>
+            <div class="text-slate-400 pl-4">└ <span class="text-rose-400">solid_queue_failed_executions</span> にエラー内容とスタックトレースを <strong>INSERT</strong></div>
+          </div>
+        </div>
       </div>
     </div>
 
