@@ -21,7 +21,7 @@ ssh:
 proxy:
   ssl: false
   host: <%= ENV["SERVER_IP"] || "34.27.174.205" %>
-  app_port: 3000
+  app_port: 80
 
 # Credentials for your image host (Docker Hub / Artifact Registry / GitHub Packages)
 registry:
