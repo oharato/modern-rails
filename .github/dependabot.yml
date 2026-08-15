@@ -1,5 +1,6 @@
 version: 2
 updates:
+  # 1. Ruby Gems (Bundler)
   - package-ecosystem: bundler
     directory: "/"
     schedule:
@@ -13,8 +14,37 @@ updates:
           - "minor"
           - "patch"
 
+  # 2. GitHub Actions Workflows
   - package-ecosystem: github-actions
     directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # 3. Dockerfile & Docker Compose Base Images
+  - package-ecosystem: docker
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # 4. Pulumi Infrastructure Dependencies (npm)
+  - package-ecosystem: npm
+    directory: "/infra"
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
