@@ -113,23 +113,27 @@ bin/kamal deploy
 ### (1) 本番 DB のバックアップをローカルにダウンロード
 
 ```bash
-# Rake タスクで一発取得 (./backups/production_YYYYMMDD_HHMMSS.dump に保存)
+# 【推奨】Rake タスクで一発取得 (./backups/production_YYYYMMDD_HHMMSS.dump に保存)
 docker compose run --rm web bin/rails db:backup:remote
 
-# または Kamal コマンドで直接実行 (PostgreSQL カスタム圧縮フォーマット)
+# または Kamal コマンドで直接実行 (PostgreSQL カスタム圧縮形式)
 bin/kamal accessory exec db -- "pg_dump -U postgres -Fc modern_rails_production" > "backup_$(date +%Y%m%d_%H%M%S).dump"
 ```
 
-### (2) 本番データをローカル開発 DB にリストア（検証・再現用）
+> **💡 `-Fc` (Custom Format) のメリット:**
+> - 自動で gzip 相当の高圧縮がかかり、ファイルサイズが数分の一になります。
+> - `pg_restore` によるテーブルごとの部分復元や、並行リストア（`-j 4`）に対応します。
+
+### (2) 取得した本番データをローカル開発 DB にリストア（検証・再現用）
 
 ```bash
-# 最新のバックアップファイルをローカル DB に適用
+# ./backups/ 内の最新のバックアップファイルをローカル DB に適用
 docker compose run --rm web bin/rails db:backup:restore_local
 ```
 
 ---
 
-## 🧹 4. 後片付け（課金防止・リソースの削除）
+## 🧹 5. 後片付け（課金防止・リソースの削除）
 
 動作確認が終了し、クラウド上のリソースをすべて削除したい場合は以下の手順を実行します：
 
