@@ -30,9 +30,7 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           cat << 'EOF' > ~/.ssh/config
           Host *
-            StrictHostKeyChecking no
-            UserKnownHostsFile /dev/null
-            LogLevel ERROR
+            StrictHostKeyChecking accept-new
             ControlMaster auto
             ControlPath ~/.ssh/control-%C
             ControlPersist 10m
@@ -41,7 +39,8 @@ jobs:
             Compression yes
           EOF
           chmod 600 ~/.ssh/config
-          rm -f ~/.ssh/known_hosts
+          rm -f ~/.ssh/known_hosts ~/.ssh/known_hosts.old
+          ssh-keyscan -t ed25519,rsa "${{ secrets.SERVER_IP || '34.27.174.205' }}" > ~/.ssh/known_hosts 2>/dev/null || true
 
       - name: Run Kamal Prune
         env:

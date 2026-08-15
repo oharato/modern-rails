@@ -12,8 +12,6 @@ ssh:
   user: deploy
   keys:
     - ~/.ssh/id_ed25519
-  extra_options:
-    verify_host_key: false
 
 # Kamal-proxy configuration
 proxy:
