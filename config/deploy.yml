@@ -2,8 +2,11 @@
 service: modern_rails
 
 # Name of the container image.
-# Must include Docker Hub username (e.g. your_username/modern_rails)
+<% if ENV["KAMAL_REGISTRY_SERVER"] %>
+image: <%= ENV["KAMAL_REGISTRY_SERVER"] %>/app
+<% else %>
 image: <%= ENV["DOCKER_USERNAME"] %>/modern_rails
+<% end %>
 
 # Deploy to these servers (managed by Pulumi)
 servers:
@@ -29,11 +32,18 @@ proxy:
 # Allow Puma 7 seconds to initialize before proxy healthcheck
 readiness_delay: 7
 
-# Credentials for your image host
+# Credentials for your image host (GCP Artifact Registry / Docker Hub)
 registry:
+<% if ENV["KAMAL_REGISTRY_SERVER"] %>
+  server: <%= ENV["KAMAL_REGISTRY_SERVER"].split("/").first %>
+  username: _json_key_base64
+  password:
+    - GCP_SA_KEY_BASE64
+<% else %>
   username: <%= ENV["DOCKER_USERNAME"] || "your-dockerhub-user" %>
   password:
     - KAMAL_REGISTRY_PASSWORD
+<% end %>
 
 # Inject ENV variables into containers (secrets come from .kamal/secrets).
 env:

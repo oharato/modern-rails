@@ -187,8 +187,9 @@ GitHub リポジトリの **Settings > Secrets and variables > Actions > New rep
 | Secret 名 | 設定する値 / 取得元 | 必須 |
 | :--- | :--- | :---: |
 | **`SSH_PRIVATE_KEY`** | `~/.ssh/id_ed25519` のファイル内容全体 | **必須** |
-| **`DOCKER_USERNAME`** | Docker Hub のユーザー名 | **必須** |
-| **`KAMAL_REGISTRY_PASSWORD`** | Docker Hub の Access Token（またはパスワード） | **必須** |
+| **`GCP_SA_KEY_BASE64`** | GCP サービスアカウントキー（Base64形式）※ Artifact Registry 利用時 | **推奨** |
+| **`DOCKER_USERNAME`** | Docker Hub のユーザー名 ※ Docker Hub 利用時 | 任意 |
+| **`KAMAL_REGISTRY_PASSWORD`** | Docker Hub の Access Token ※ Docker Hub 利用時 | 任意 |
 | **`RAILS_MASTER_KEY`** | `config/master.key` のファイル内容 | **必須** |
 | **`POSTGRES_PASSWORD`** | `.env` に設定した DB パスワード | **必須** |
 | **`MODERN_RAILS_DATABASE_PASSWORD`** | `.env` に設定した DB パスワード | **必須** |
@@ -200,7 +201,9 @@ GitHub リポジトリの **Settings > Secrets and variables > Actions > New rep
 
 ### (2) ワークフローの仕組み（高速化の工夫）
 
-1. **BuildKit キャッシュマウント**:
+1. **GCP Artifact Registry（`us-central1`）による超高速イメージ転送**:
+   - 同一リージョン内でのイメージ pull により、Docker Hub 経由と比べて転送時間が **約 25 秒短縮** されます。
+2. **BuildKit キャッシュマウント**:
    - `Dockerfile` に `--mount=type=cache` が組み込まれており、Gemfile やアセットに変更がない場合は数秒でビルドが完了します。
 2. **`--skip-prune` 高速デプロイ**:
    - 毎回のデプロイ時に古いイメージの掃除処理（10〜15秒）をスキップし、待ち時間を最小化します。

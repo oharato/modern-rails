@@ -47,6 +47,8 @@ jobs:
           MODERN_RAILS_DATABASE_PASSWORD: ${{ secrets.MODERN_RAILS_DATABASE_PASSWORD }}
           BASIC_AUTH_USER: ${{ secrets.BASIC_AUTH_USER }}
           BASIC_AUTH_PASSWORD: ${{ secrets.BASIC_AUTH_PASSWORD }}
+          GCP_SA_KEY_BASE64: ${{ secrets.GCP_SA_KEY_BASE64 }}
+          KAMAL_REGISTRY_SERVER: ${{ secrets.KAMAL_REGISTRY_SERVER || 'us-central1-docker.pkg.dev/modern-rails-1786791154/modern-rails-repo' }}
           SERVER_IP: ${{ secrets.SERVER_IP || '34.27.174.205' }}
         run: |
           kamal deploy --skip-prune
