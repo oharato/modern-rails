@@ -147,20 +147,105 @@
       </div>
     </div>
 
-    <!-- SQL Magic: FOR UPDATE SKIP LOCKED -->
-    <div class="p-5 bg-slate-900 text-slate-100 rounded-xl space-y-3">
-      <div class="flex items-center justify-between">
-        <span class="text-xs font-bold text-indigo-400 font-mono">CORE SQL: FOR UPDATE SKIP LOCKED</span>
-        <span class="text-[11px] text-slate-400">複数ワーカーが同時に実行しても一切ブロックしない秘密</span>
+    <!-- SQL Magic: FOR UPDATE SKIP LOCKED Deep Dive -->
+    <div class="p-6 bg-slate-900 text-slate-100 rounded-2xl space-y-5 border border-slate-800">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500 text-white font-mono">SQL DEEP DIVE</span>
+          <h4 class="text-base font-bold text-white">FOR UPDATE SKIP LOCKED の魔法</h4>
+        </div>
+        <span class="text-xs text-slate-400">なぜ数十台のワーカーが同時にジョブを取り合っても詰まらないのか？</span>
       </div>
-      <pre class="text-xs font-mono text-emerald-400 overflow-x-auto p-3 bg-slate-950 rounded-lg"><code>SELECT job_id FROM solid_queue_ready_executions
+
+      <pre class="text-xs font-mono text-emerald-400 overflow-x-auto p-4 bg-slate-950 rounded-xl border border-slate-800/80"><code>-- Solid Queue のワーカーが実行する実際のポーリング SQL
+SELECT job_id 
+FROM solid_queue_ready_executions
 WHERE queue_name = 'default'
 ORDER BY priority ASC, job_id ASC
 LIMIT 1
 FOR UPDATE SKIP LOCKED;</code></pre>
-      <p class="text-xs text-slate-300 leading-relaxed">
-        他のワーカーが取得中の行は <strong>SKIP LOCKED</strong> により待たされることなくスキップされ、次のジョブが瞬時に取得されます。ロック競合やデッドロックが起きないため、ワーカー数を何十台に増やしてもスケールします。
-      </p>
+
+      <!-- Comparison of Locking Strategies -->
+      <div class="space-y-3">
+        <h5 class="text-xs font-bold text-slate-300 uppercase tracking-wider">他のロック手法との決定的な違い</h5>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+          <div class="p-3.5 rounded-lg bg-slate-800/60 border border-slate-700/60 space-y-1.5">
+            <div class="font-bold text-rose-400 flex items-center gap-1">
+              <span>✕</span> 通常の FOR UPDATE
+            </div>
+            <p class="text-slate-300 leading-relaxed">
+              先行ワーカーがジョブ #1 を処理している間、後続ワーカーは #1 が解放されるまで<strong>待機（ブロック）</strong>。後続のジョブ #2 があるのに誰も処理できず大渋滞。
+            </p>
+          </div>
+
+          <div class="p-3.5 rounded-lg bg-slate-800/60 border border-slate-700/60 space-y-1.5">
+            <div class="font-bold text-amber-400 flex items-center gap-1">
+              <span>△</span> FOR UPDATE NOWAIT
+            </div>
+            <p class="text-slate-300 leading-relaxed">
+              待機はしないが、ロック中の行に当たると即座に<strong>エラー（LockNotAvailable 例外）</strong>をスロー。リトライループで CPU と DB 接続が無駄に浪費される。
+            </p>
+          </div>
+
+          <div class="p-3.5 rounded-lg bg-indigo-900/40 border border-indigo-500/50 space-y-1.5">
+            <div class="font-bold text-emerald-400 flex items-center gap-1">
+              <span>✓</span> FOR UPDATE SKIP LOCKED
+            </div>
+            <p class="text-slate-200 leading-relaxed">
+              ロック中の行を<strong>「まるで存在しないかのように無視して次へスキップ」</strong>。後続ワーカーは瞬時にジョブ #2 を掴んで並行実行！エラーも待機もゼロ。
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Database Compatibility Matrix -->
+      <div class="space-y-3 pt-2">
+        <h5 class="text-xs font-bold text-slate-300 uppercase tracking-wider">🗄️ 各リレーショナルデータベースでの対応状況</h5>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-xs divide-y divide-slate-800 border border-slate-800 rounded-lg overflow-hidden">
+            <thead class="bg-slate-950 text-slate-400 font-semibold">
+              <tr>
+                <th class="px-3 py-2 text-left">DB</th>
+                <th class="px-3 py-2 text-left">対応バージョン</th>
+                <th class="px-3 py-2 text-left">サポート状況</th>
+                <th class="px-3 py-2 text-left">仕組みと特徴</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60 text-slate-300 font-sans">
+              <tr>
+                <td class="px-3 py-2 font-mono font-bold text-indigo-400">PostgreSQL</td>
+                <td class="px-3 py-2">9.5 以降（本アプリは 17）</td>
+                <td class="px-3 py-2"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-900/60 text-emerald-300 border border-emerald-700/50">◎ 完全対応 (Tier 1)</span></td>
+                <td class="px-3 py-2 text-slate-400">標準の <code>FOR UPDATE SKIP LOCKED</code> が最も成熟。超高速。</td>
+              </tr>
+              <tr>
+                <td class="px-3 py-2 font-mono font-bold text-indigo-400">MySQL / MariaDB</td>
+                <td class="px-3 py-2">MySQL 8.0+ / MariaDB 10.6+</td>
+                <td class="px-3 py-2"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-900/60 text-emerald-300 border border-emerald-700/50">◎ 完全対応 (Tier 1)</span></td>
+                <td class="px-3 py-2 text-slate-400">37signals（Basecamp / HEY）自身が MySQL 8 上で本番運用中。</td>
+              </tr>
+              <tr>
+                <td class="px-3 py-2 font-mono font-bold text-indigo-400">SQLite 3</td>
+                <td class="px-3 py-2">3.37+（Rails 8 デフォルト）</td>
+                <td class="px-3 py-2"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-900/60 text-emerald-300 border border-emerald-700/50">◎ 完全対応 (Tier 1)</span></td>
+                <td class="px-3 py-2 text-slate-400">WAL モード + busy_timeout 最適化。ファイル分離で競合回避。</td>
+              </tr>
+              <tr>
+                <td class="px-3 py-2 font-mono font-bold text-indigo-400">Oracle Database</td>
+                <td class="px-3 py-2">11g 以降</td>
+                <td class="px-3 py-2"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-900/60 text-amber-300 border border-amber-700/50">△ 要検証</span></td>
+                <td class="px-3 py-2 text-slate-400"><code>SKIP LOCKED</code> 構文はあるが、ActiveRecord アダプタの互換性に依存。</td>
+              </tr>
+              <tr>
+                <td class="px-3 py-2 font-mono font-bold text-indigo-400">SQL Server (MSSQL)</td>
+                <td class="px-3 py-2">2008 以降</td>
+                <td class="px-3 py-2"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-900/60 text-amber-300 border border-amber-700/50">△ 要検証</span></td>
+                <td class="px-3 py-2 text-slate-400"><code>WITH (READPAST, UPDLOCK)</code> に相当するがアダプタ依存。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
     <!-- Features Grid -->
