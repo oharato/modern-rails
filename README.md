@@ -10,7 +10,7 @@
 
 | 技術 | バージョン | 特徴・役割 |
 | :--- | :--- | :--- |
-| **Ruby** | `3.4` (Slim) | 最新のRubyランタイム |
+| **Ruby** | `4.0` (Slim) | 最新のRuby 4系ランタイム |
 | **Ruby on Rails** | `8.0` | 最新メジャーバージョン（Solid family標準搭載） |
 | **PostgreSQL** | `17` (Alpine) | 高信頼性リレーショナルデータベース |
 | **CSS Framework** | **Tailwind CSS v4** | `tailwindcss-rails`（Node.js不要のネイティブビルド） |
