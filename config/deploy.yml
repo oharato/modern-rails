@@ -54,7 +54,7 @@ accessories:
       secret:
         - POSTGRES_PASSWORD
     directories:
-      - /var/lib/postgresql/data:/var/lib/postgresql/data
+      - /home/deploy/postgres-data:/var/lib/postgresql/data
 
 # Aliases
 aliases:
