@@ -1,0 +1,378 @@
+<div class="max-w-5xl mx-auto space-y-12 pb-20">
+  <!-- Breadcrumb & Header -->
+  <div>
+    <div class="flex items-center gap-2 text-xs text-slate-500 mb-3">
+      <%= link_to "ホーム", root_path, class: "hover:text-indigo-600" %>
+      <span>/</span>
+      <%= link_to "学習ガイド", guide_path, class: "hover:text-indigo-600" %>
+      <span>/</span>
+      <span class="text-slate-800 font-medium">Solid Trio 徹底解説</span>
+    </div>
+
+    <div class="bg-gradient-to-r from-purple-900 via-slate-900 to-indigo-950 text-white rounded-3xl p-8 sm:p-10 shadow-xl relative overflow-hidden">
+      <div class="relative z-10 max-w-3xl">
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-purple-500/30 text-purple-200 border border-purple-400/30 mb-4">
+          Rails 8 Core Philosophy & Architecture
+        </span>
+        <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">
+          Solid Trio：Redis 不要の DB 駆動アーキテクチャ超解説
+        </h1>
+        <p class="mt-4 text-slate-300 text-base sm:text-lg leading-relaxed">
+          なぜ Rails 8 は 10 年以上君臨した Redis を捨て、PostgreSQL / SQLite への一本化に踏み切ったのか？<br class="hidden sm:inline">
+          Solid Queue・Solid Cache・Solid Cable の内部構造、SQL の挙動、本番運用パターンまで徹底的に掘り下げます。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Nav Anchor Pills -->
+  <div class="flex flex-wrap gap-2 text-xs font-medium">
+    <a href="#why-solid" class="px-3.5 py-2 bg-white rounded-lg border border-slate-200 text-slate-700 hover:border-purple-500 hover:text-purple-700 shadow-xs transition">1. なぜ誕生したのか（背景とメリット）</a>
+    <a href="#solid-queue" class="px-3.5 py-2 bg-white rounded-lg border border-slate-200 text-slate-700 hover:border-purple-500 hover:text-purple-700 shadow-xs transition">2. Solid Queue (キュー)</a>
+    <a href="#solid-cache" class="px-3.5 py-2 bg-white rounded-lg border border-slate-200 text-slate-700 hover:border-purple-500 hover:text-purple-700 shadow-xs transition">3. Solid Cache (キャッシュ)</a>
+    <a href="#solid-cable" class="px-3.5 py-2 bg-white rounded-lg border border-slate-200 text-slate-700 hover:border-purple-500 hover:text-purple-700 shadow-xs transition">4. Solid Cable (WebSocket)</a>
+    <a href="#comparison" class="px-3.5 py-2 bg-white rounded-lg border border-slate-200 text-slate-700 hover:border-purple-500 hover:text-purple-700 shadow-xs transition">5. Redis vs Solid 徹底比較</a>
+    <a href="#production" class="px-3.5 py-2 bg-white rounded-lg border border-slate-200 text-slate-700 hover:border-purple-500 hover:text-purple-700 shadow-xs transition">6. 本番運用・マルチDB構成</a>
+  </div>
+
+  <!-- 1. Why Solid? -->
+  <section id="why-solid" class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+    <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+      <span class="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-sm">1</span>
+      <h2 class="text-xl sm:text-2xl font-bold text-slate-800">なぜ Solid Trio が生まれたのか？（Redis からの脱却）</h2>
+    </div>
+
+    <div class="prose prose-slate text-sm text-slate-600 leading-relaxed space-y-4">
+      <p>
+        Rails 7 までの典型的な構成では、Rails 本体とは別に <strong>Redis サーバー</strong>（または AWS ElastiCache 等）を稼働させるのが常識でした。
+        しかし、これには以下の深刻な課題とコストが存在していました：
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 not-prose mt-4">
+        <div class="p-4 rounded-xl bg-rose-50/70 border border-rose-200 text-rose-900 space-y-2">
+          <div class="font-bold text-sm flex items-center gap-1.5 text-rose-700">
+            <span>⚠️</span> インフラの複雑性と運用コスト
+          </div>
+          <p class="text-xs text-rose-800 leading-relaxed">
+            Redis の冗長化（Sentinel/Cluster）、メモリ枯渇時の OOM Killer 監視、バックアップ、バージョン管理など、RDB とは別の運用負荷が二重に発生。
+          </p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-rose-50/70 border border-rose-200 text-rose-900 space-y-2">
+          <div class="font-bold text-sm flex items-center gap-1.5 text-rose-700">
+            <span>⚠️</span> 高価な RAM（メモリ）の制約
+          </div>
+          <p class="text-xs text-rose-800 leading-relaxed">
+            Redis は全データをメモリ上に保持するため、数十GB〜数百GBのキャッシュを保持するとクラウド利用料が跳ね上がる。
+          </p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-rose-50/70 border border-rose-200 text-rose-900 space-y-2">
+          <div class="font-bold text-sm flex items-center gap-1.5 text-rose-700">
+            <span>⚠️</span> DB トランザクションとの不整合
+          </div>
+          <p class="text-xs text-rose-800 leading-relaxed">
+            DB トランザクション内でジョブを Redis にエンキューすると、DB ロールバック時に「存在しないレコードに対するジョブ」が実行されてしまう（Ghost Jobs）。
+          </p>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-xl bg-indigo-50 border border-indigo-100 mt-6">
+        <h4 class="font-bold text-indigo-900 text-sm mb-1">💡 ハードウェアの進化と時代の変化（SSD の爆速化）</h4>
+        <p class="text-xs text-indigo-800 leading-relaxed">
+          現代の NVMe SSD は毎秒数千MBの読み書きが可能になり、PostgreSQL は <code>FOR UPDATE SKIP LOCKED</code>（競合しない高速行ロック）を完備しています。<br>
+          「99% の Web アプリケーションにとって、DB をキューやキャッシュとして使う性能はすでに十分すぎるほど高速である」という確信のもと、37signals (DHH) が主導して Rails 8 の標準アーキテクチャとして採用されました。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Solid Queue Deep Dive -->
+  <section id="solid-queue" class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+      <div class="flex items-center gap-3">
+        <span class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm">2</span>
+        <div>
+          <h2 class="text-xl sm:text-2xl font-bold text-slate-800">Solid Queue：DB 駆動バックグラウンドキュー</h2>
+          <p class="text-xs text-slate-500">Sidekiq に匹敵する機能（Cron代替・同時実行制御・一時停止）を DB で完全実装</p>
+        </div>
+      </div>
+      <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-xs font-bold rounded-full">ActiveJob 標準</span>
+    </div>
+
+    <!-- How it works -->
+    <div class="space-y-4">
+      <h3 class="font-bold text-slate-800 text-base">🔍 どのように動作するのか？（内部メカニズム）</h3>
+      <p class="text-sm text-slate-600 leading-relaxed">
+        Solid Queue は、ジョブのライフサイクルごとに専用の DB テーブル（スキーマ）を使い分けています。
+      </p>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-xs divide-y divide-slate-200 border border-slate-100 rounded-lg">
+          <thead class="bg-slate-50 text-slate-700 font-semibold">
+            <tr>
+              <th class="px-4 py-2.5 text-left">テーブル名</th>
+              <th class="px-4 py-2.5 text-left">役割</th>
+              <th class="px-4 py-2.5 text-left">特徴・処理内容</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 text-slate-600 font-mono">
+            <tr>
+              <td class="px-4 py-2.5 font-bold text-indigo-600">solid_queue_jobs</td>
+              <td class="px-4 py-2.5 font-sans">全ジョブのマスター定義</td>
+              <td class="px-4 py-2.5 font-sans">引数（JSON）、クラス名、キュー名、優先度を保持</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2.5 font-bold text-emerald-600">solid_queue_ready_executions</td>
+              <td class="px-4 py-2.5 font-sans">実行待ち（Ready）キュー</td>
+              <td class="px-4 py-2.5 font-sans">ワーカーがポーリングして取得するテーブル（最小限の列のみで高速）</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2.5 font-bold text-amber-600">solid_queue_scheduled_executions</td>
+              <td class="px-4 py-2.5 font-sans">スケジュール（遅延）ジョブ</td>
+              <td class="px-4 py-2.5 font-sans"><code>perform_in(10.minutes)</code> などの未来実行ジョブを管理</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2.5 font-bold text-purple-600">solid_queue_claimed_executions</td>
+              <td class="px-4 py-2.5 font-sans">実行中（In-Flight）ジョブ</td>
+              <td class="px-4 py-2.5 font-sans">ワーカープロセスが確保中のジョブ（ハートビート監視付き）</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2.5 font-bold text-rose-600">solid_queue_failed_executions</td>
+              <td class="px-4 py-2.5 font-sans">失敗ジョブ</td>
+              <td class="px-4 py-2.5 font-sans">エラー内容・スタックトレースを保存（リトライ可能）</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SQL Magic: FOR UPDATE SKIP LOCKED -->
+    <div class="p-5 bg-slate-900 text-slate-100 rounded-xl space-y-3">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold text-indigo-400 font-mono">CORE SQL: FOR UPDATE SKIP LOCKED</span>
+        <span class="text-[11px] text-slate-400">複数ワーカーが同時に実行しても一切ブロックしない秘密</span>
+      </div>
+      <pre class="text-xs font-mono text-emerald-400 overflow-x-auto p-3 bg-slate-950 rounded-lg"><code>SELECT job_id FROM solid_queue_ready_executions
+WHERE queue_name = 'default'
+ORDER BY priority ASC, job_id ASC
+LIMIT 1
+FOR UPDATE SKIP LOCKED;</code></pre>
+      <p class="text-xs text-slate-300 leading-relaxed">
+        他のワーカーが取得中の行は <strong>SKIP LOCKED</strong> により待たされることなくスキップされ、次のジョブが瞬時に取得されます。ロック競合やデッドロックが起きないため、ワーカー数を何十台に増やしてもスケールします。
+      </p>
+    </div>
+
+    <!-- Features Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-1.5">
+        <h4 class="font-bold text-slate-800 text-xs flex items-center gap-1.5">
+          <span class="text-indigo-600">📅</span> 定期実行（Recurring Tasks / Cron代替）
+        </h4>
+        <p class="text-xs text-slate-600 leading-relaxed">
+          <code>config/recurring.yml</code> に Cron 書式で定義するだけで、whenever や OS の crontab 不要で定期ジョブが実行されます。
+        </p>
+      </div>
+
+      <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-1.5">
+        <h4 class="font-bold text-slate-800 text-xs flex items-center gap-1.5">
+          <span class="text-indigo-600">🔒</span> トランザクション完全保護
+        </h4>
+        <p class="text-xs text-slate-600 leading-relaxed">
+          <code>ActiveRecord::Base.transaction</code> 内でジョブを呼び出した場合、DB コミットが成功した瞬間にのみジョブがエンキューされます。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Solid Cache Deep Dive -->
+  <section id="solid-cache" class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+      <div class="flex items-center gap-3">
+        <span class="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-sm">3</span>
+        <div>
+          <h2 class="text-xl sm:text-2xl font-bold text-slate-800">Solid Cache：SSD を活用する大容量キャッシュ</h2>
+          <p class="text-xs text-slate-500">高価な RAM（Redis）から、安価で高速な Disk/SSD キャッシュへのパラダイムシフト</p>
+        </div>
+      </div>
+      <span class="px-3 py-1 bg-purple-100 text-purple-800 text-xs font-bold rounded-full">Rails.cache 標準</span>
+    </div>
+
+    <div class="prose prose-slate text-sm text-slate-600 leading-relaxed space-y-4">
+      <p>
+        <strong>Solid Cache</strong> は、キー・バリューデータを PostgreSQL の <code>solid_cache_entries</code> テーブルに保存するキャッシュストアです。
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose">
+        <div class="p-4 rounded-xl border border-purple-100 bg-purple-50/50 space-y-2">
+          <h4 class="font-bold text-purple-900 text-xs">🚀 64bit Key Hash による超高速インデックス検索</h4>
+          <p class="text-xs text-purple-800 leading-relaxed">
+            長いキャッシュキー文字列（例: <code>views/users/123-20260815/summary</code>）を直接インデックス化するのではなく、64bit 整数（<code>key_hash</code>）に変換して B-Tree インデックスを引くため、数百万件のキャッシュがあっても数ミリ秒以下でヒットします。
+          </p>
+        </div>
+
+        <div class="p-4 rounded-xl border border-purple-100 bg-purple-50/50 space-y-2">
+          <h4 class="font-bold text-purple-900 text-xs">🧹 バックグラウンド FIFO/LRU エビクション</h4>
+          <p class="text-xs text-purple-800 leading-relaxed">
+            指定した最大サイズ（例: 50GB）や有効期限（<code>max_age</code>）を超えると、古いキャッシュレコードが自動的にバックグラウンドでバッチ削除されます。メインのWebリクエストを一切ブロックしません。
+          </p>
+        </div>
+      </div>
+
+      <div class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs font-mono">
+        <div class="text-slate-400 mb-2"># config/cache.yml の設定例</div>
+        <pre><code>default: &amp;default
+  max_size: 256.gigabytes  # ディスク容量が許す限りテラバイト級まで拡大可能！
+  max_age: 60.days         # 最長保持期間
+  namespace: my_app_cache</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Solid Cable Deep Dive -->
+  <section id="solid-cable" class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+      <div class="flex items-center gap-3">
+        <span class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm">4</span>
+        <div>
+          <h2 class="text-xl sm:text-2xl font-bold text-slate-800">Solid Cable：DB によるリアルタイム Action Cable</h2>
+          <p class="text-xs text-slate-500">Turbo Streams やチャット通知を Redis なしで WebSocket 配信</p>
+        </div>
+      </div>
+      <span class="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full">Action Cable 標準</span>
+    </div>
+
+    <div class="prose prose-slate text-sm text-slate-600 leading-relaxed space-y-4">
+      <p>
+        Turbo Streams のリアルタイムブロードキャスト（<code>broadcast_prepend_to</code> など）を行う際、従来の Action Cable は Redis の Pub/Sub チャンネルを使用していました。<br>
+        <strong>Solid Cable</strong> は、<code>solid_cable_messages</code> テーブルにメッセージを INSERT し、接続中の各 Puma スレッドが DB を高速ポーリング（または PostgreSQL NOTIFY）してクライアントに WebSocket 配信します。
+      </p>
+
+      <div class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs font-mono">
+        <div class="text-slate-400 mb-1"># config/cable.yml</div>
+        <pre><code>development:
+  adapter: solid_cable
+  polling_interval: 0.1.seconds
+  message_retention: 1.day
+
+production:
+  adapter: solid_cable
+  polling_interval: 0.1.seconds</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Full Comparison Table -->
+  <section id="comparison" class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+    <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+      <span class="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-sm">5</span>
+      <h2 class="text-xl sm:text-2xl font-bold text-slate-800">従来スタック（Redis + Sidekiq）vs Rails 8 Solid Trio 徹底比較</h2>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-xs divide-y divide-slate-200 border border-slate-200 rounded-xl overflow-hidden">
+        <thead class="bg-slate-100 text-slate-800 font-bold">
+          <tr>
+            <th class="px-4 py-3 text-left">比較項目</th>
+            <th class="px-4 py-3 text-left bg-rose-50/50 text-rose-900">従来のスタック（Redis + Sidekiq）</th>
+            <th class="px-4 py-3 text-left bg-indigo-50/50 text-indigo-900">Rails 8（Solid Trio + PostgreSQL）</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 text-slate-700">
+          <tr>
+            <td class="px-4 py-3 font-semibold text-slate-900">必要インフラ</td>
+            <td class="px-4 py-3 bg-rose-50/20">PostgreSQL ＋ Redis サーバー（2系統）</td>
+            <td class="px-4 py-3 bg-indigo-50/20 font-bold text-emerald-700">PostgreSQL 単体のみ（1系統で完結）</td>
+          </tr>
+          <tr>
+            <td class="px-4 py-3 font-semibold text-slate-900">キャッシュ容量 &amp; コスト</td>
+            <td class="px-4 py-3 bg-rose-50/20">高価な RAM 容量に縛られる（数GBで高額）</td>
+            <td class="px-4 py-3 bg-indigo-50/20 font-bold text-emerald-700">安価な SSD で数百GB〜TB単位を安価に保持可能</td>
+          </tr>
+          <tr>
+            <td class="px-4 py-3 font-semibold text-slate-900">DB トランザクション整合性</td>
+            <td class="px-4 py-3 bg-rose-50/20">別システムのためロールバック時の不整合リスクあり</td>
+            <td class="px-4 py-3 bg-indigo-50/20 font-bold text-emerald-700">完全な ACID トランザクション保護（ゴーストなし）</td>
+          </tr>
+          <tr>
+            <td class="px-4 py-3 font-semibold text-slate-900">Cron / 定期ジョブ</td>
+            <td class="px-4 py-3 bg-rose-50/20">whenever / Sidekiq-cron / OS cron が別途必要</td>
+            <td class="px-4 py-3 bg-indigo-50/20 font-bold text-emerald-700"><code>config/recurring.yml</code> で完全標準内蔵</td>
+          </tr>
+          <tr>
+            <td class="px-4 py-3 font-semibold text-slate-900">プロセス再起動時のキャッシュ</td>
+            <td class="px-4 py-3 bg-rose-50/20">再起動で揮発、または RDB/AOF 設定が必要</td>
+            <td class="px-4 py-3 bg-indigo-50/20 font-bold text-emerald-700">永続化されており、デプロイや再起動でも消失ゼロ</td>
+          </tr>
+          <tr>
+            <td class="px-4 py-3 font-semibold text-slate-900">デプロイ (Kamal 2)</td>
+            <td class="px-4 py-3 bg-rose-50/20">Redis コンテナ・ボリューム設定・接続設定が必要</td>
+            <td class="px-4 py-3 bg-indigo-50/20 font-bold text-emerald-700">DB コンテナ 1 つ立ち上げるだけで即座に稼働</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 6. Production Architectures -->
+  <section id="production" class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+    <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+      <span class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm">6</span>
+      <h2 class="text-xl sm:text-2xl font-bold text-slate-800">本番運用の設計パターン（単一DB vs マルチDB）</h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="p-5 rounded-xl border border-slate-200 bg-slate-50 space-y-3">
+        <span class="font-bold text-slate-800 text-sm">パターン A: 単一データベース構成（中小規模・本アプリ構成）</span>
+        <p class="text-xs text-slate-600 leading-relaxed">
+          1 つの PostgreSQL データベース内に業務テーブル（users, tasks等）と Solid テーブル（solid_queue_*, solid_cache_*）を同居させる最もシンプルな構成。
+        </p>
+        <div class="text-xs text-emerald-700 font-medium">
+          ✅ メリット: サーバー1台で完結。運用・バックアップが最も簡単。
+        </div>
+      </div>
+
+      <div class="p-5 rounded-xl border border-slate-200 bg-slate-50 space-y-3">
+        <span class="font-bold text-slate-800 text-sm">パターン B: マルチデータベース構成（大規模・高トラフィック）</span>
+        <p class="text-xs text-slate-600 leading-relaxed">
+          <code>config/database.yml</code> で <code>primary</code>, <code>cache</code>, <code>queue</code>, <code>cable</code> を別々の PostgreSQL インスタンス（または別DB）に分離する構成。
+        </p>
+        <div class="text-xs text-indigo-700 font-medium">
+          ✅ メリット: キャッシュやキューの I/O 負荷がプライマリ業務 DB に影響を与えない。
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs font-mono">
+      <div class="text-slate-400 mb-2"># マルチDB構成の database.yml（Rails 8 標準サポート）</div>
+      <pre><code>production:
+  primary:
+    &lt;&lt;: *default
+    database: myapp_production
+  cache:
+    &lt;&lt;: *default
+    database: myapp_production_cache
+    migrations_paths: db/cache_migrate
+  queue:
+    &lt;&lt;: *default
+    database: myapp_production_queue
+    migrations_paths: db/queue_migrate
+  cable:
+    &lt;&lt;: *default
+    database: myapp_production_cable
+    migrations_paths: db/cable_migrate</code></pre>
+    </div>
+  </section>
+
+  <!-- Bottom CTA -->
+  <div class="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 bg-slate-100 rounded-2xl border border-slate-200">
+    <div>
+      <div class="font-bold text-slate-800 text-sm">実際に Solid Queue を動かしてみましょう</div>
+      <div class="text-xs text-slate-500 mt-0.5">本アプリ内で非同期ジョブをエンキューしてテーブルレコードを確認できます</div>
+    </div>
+    <div class="flex gap-3">
+      <%= link_to "ジョブ実行テストへ", jobs_test_path, class: "px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold shadow-xs transition" %>
+      <%= link_to "← ガイドトップへ戻る", guide_path, class: "px-4 py-2 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-lg text-xs font-semibold transition" %>
+    </div>
+  </div>
+</div>

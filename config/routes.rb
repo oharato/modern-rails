@@ -21,6 +21,7 @@ Rails.application.routes.draw do
 
   # Rails 8 Modern Stack Guide
   get "guide" => "guide#index", as: :guide
+  get "guide/solid-trio" => "guide#solid_trio", as: :solid_trio_guide
 
   # Health Check & PWA
   get "up" => "rails/health#show", as: :rails_health_check
