@@ -9,7 +9,7 @@ namespace :db do
 
       puts "📦 Starting production database dump via Kamal..."
       cmd = %(bin/kamal accessory exec db -- "pg_dump -U postgres -Fc modern_rails_production" > "#{backup_file}")
-      
+
       if system(cmd)
         puts "✅ Backup completed successfully!"
         puts "📁 Saved to: #{backup_file} (#{File.size(backup_file) / 1024} KB)"
@@ -30,7 +30,7 @@ namespace :db do
 
       puts "🔄 Restoring #{File.basename(latest_dump)} into local development database..."
       db_config = Rails.configuration.database_configuration["development"]
-      
+
       cmd = %(docker compose exec -T db pg_restore -U postgres -d modern_rails_development --clean --no-owner < "#{latest_dump}")
       if system(cmd)
         puts "✅ Local database restored successfully from production dump!"

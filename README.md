@@ -167,3 +167,46 @@ docker compose up -d
 - **Rails固有のナビゲーション**: ルート定義からアクションへのジャンプ、アソシエーションの解決
 - **コード補完 & ホバー情報**: 型やドキュメントの即時表示
 - **自動フォーマット & リント**: RuboCop とのシームレスな統合
+
+---
+
+## 🔍 データベース管理 (Harlequin TUI)
+
+ターミナルベースの高速SQL IDE **[Harlequin](https://harlequin.sh/)** を使って、開発環境およびテスト環境のPostgreSQLデータベースを閲覧・操作できます。
+
+プロジェクトルートに [`.harlequin.toml`](file:///home/oharato/workspace/modern-rails/.harlequin.toml) が配置されているため、追加オプション不要で接続可能です。
+
+### 1. インストール (未導入の場合)
+```bash
+uv tool install "harlequin[postgres]"
+```
+
+### 2. 起動方法
+
+```bash
+# 開発環境 DB (modern_rails_development) に接続
+harlequin
+
+# テスト環境 DB (modern_rails_test) に接続
+harlequin -P test
+```
+
+### 3. CLIワンライナー実行 (`hsql`)
+TUIを開かずにターミナル上で直接クエリ結果を出力することも可能です。
+```bash
+# 開発DBでクエリ実行
+hsql -c "SELECT count(*) FROM users;"
+
+# テストDBでクエリ実行
+hsql -P test -c "SELECT count(*) FROM users;"
+```
+
+### 4. 主な操作キー
+| キー | 動作 |
+| :--- | :--- |
+| **`Ctrl + J`** / **`F5`** | カーソル位置のSQL / 選択範囲のSQLを実行 |
+| **`F6`** | データカタログ（テーブル一覧・スキーマ）にフォーカス切替 |
+| **`F7`** | クエリ結果ビューにフォーカス切替 |
+| **`Ctrl + K`** | クエリフォーマッタ実行 |
+| **`Ctrl + C`** / **`Ctrl + Q`** | Harlequin の終了 |
+

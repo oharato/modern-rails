@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_08_15_081600) do
+ActiveRecord::Schema[8.0].define(version: 2026_08_15_084600) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -103,6 +103,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_15_081600) do
     t.text "metadata"
     t.datetime "created_at", null: false
     t.string "name_slug"
+    t.string "kind", default: "Worker", null: false
     t.index ["last_heartbeat_at"], name: "index_solid_queue_processes_on_last_heartbeat_at"
     t.index ["name"], name: "index_solid_queue_processes_on_name", unique: true
     t.index ["supervisor_id"], name: "index_solid_queue_processes_on_supervisor_id"
