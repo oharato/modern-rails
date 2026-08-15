@@ -1,0 +1,42 @@
+name: Weekly Server Disk Cleanup
+
+on:
+  schedule:
+    # Every Sunday at 04:00 UTC (13:00 JST)
+    - cron: "0 4 * * 0"
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    name: Prune Old Docker Containers & Images
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+
+      - name: Install Kamal
+        run: gem install kamal -v 2.12.0
+
+      - name: Set up SSH Private Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.SERVER_IP || '34.27.174.205' }}" >> ~/.ssh/known_hosts
+
+      - name: Run Kamal Prune
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          KAMAL_REGISTRY_PASSWORD: ${{ secrets.KAMAL_REGISTRY_PASSWORD }}
+          RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          MODERN_RAILS_DATABASE_PASSWORD: ${{ secrets.MODERN_RAILS_DATABASE_PASSWORD }}
+          SERVER_IP: ${{ secrets.SERVER_IP || '34.27.174.205' }}
+        run: |
+          kamal prune --all

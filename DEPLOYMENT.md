@@ -176,6 +176,39 @@ docker compose run --rm web bin/rails db:backup:restore_local
 
 ---
 
+## ⚡ 7. GitHub Actions による main マージ時自動デプロイ（高速化運用）
+
+GitHub の `main` ブランチに Pull Request がマージされると、**GitHub Actions が自動でビルド＆ゼロダウンタイムデプロイ（`--skip-prune` 高速モード）** を実行します。
+
+### (1) GitHub Repository Secrets の登録一覧
+
+GitHub リポジトリの **Settings > Secrets and variables > Actions > New repository secret** で以下を登録します：
+
+| Secret 名 | 設定する値 / 取得元 | 必須 |
+| :--- | :--- | :---: |
+| **`SSH_PRIVATE_KEY`** | `~/.ssh/id_ed25519` のファイル内容全体 | **必須** |
+| **`DOCKER_USERNAME`** | Docker Hub のユーザー名 | **必須** |
+| **`KAMAL_REGISTRY_PASSWORD`** | Docker Hub の Access Token（またはパスワード） | **必須** |
+| **`RAILS_MASTER_KEY`** | `config/master.key` のファイル内容 | **必須** |
+| **`POSTGRES_PASSWORD`** | `.env` に設定した DB パスワード | **必須** |
+| **`MODERN_RAILS_DATABASE_PASSWORD`** | `.env` に設定した DB パスワード | **必須** |
+| **`BASIC_AUTH_USER`** | Basic 認証のユーザー名（例: `admin`） | 任意 |
+| **`BASIC_AUTH_PASSWORD`** | Basic 認証のパスワード | 任意 |
+| **`SERVER_IP`** | サーバーの固定IP（未指定時は `34.27.174.205` がデフォルト） | 任意 |
+
+---
+
+### (2) ワークフローの仕組み（高速化の工夫）
+
+1. **BuildKit キャッシュマウント**:
+   - `Dockerfile` に `--mount=type=cache` が組み込まれており、Gemfile やアセットに変更がない場合は数秒でビルドが完了します。
+2. **`--skip-prune` 高速デプロイ**:
+   - 毎回のデプロイ時に古いイメージの掃除処理（10〜15秒）をスキップし、待ち時間を最小化します。
+3. **週次自動クリーンアップ（`.github/workflows/cleanup.yml`）**:
+   - 毎週日曜日 13:00 JST に自動で `kamal prune --all` が実行され、サーバーのディスク容量（30GB SSD）を健全に保ちます。
+
+---
+
 ## 🧹 リソースの完全破棄（課金防止・後片付け）
 
 検証が完了し、クラウド上のリソースをすべて削除したい場合は以下の手順を実行します：
@@ -188,6 +221,6 @@ export PULUMI_CONFIG_PASSPHRASE="modern-rails-passphrase"
 pulumi destroy --yes
 cd ..
 
-# 2. GCP プロジェクト自体の完全削除
+# 2. (任意) GCP プロジェクト自体の完全削除
 gcloud projects delete modern-rails-1786791154 --quiet
 ```
