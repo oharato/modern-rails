@@ -60,4 +60,4 @@ jobs:
           BASIC_AUTH_PASSWORD: ${{ secrets.BASIC_AUTH_PASSWORD || 'password123' }}
         run: |
           kamal lock release 2>/dev/null || true
-          kamal deploy
+          kamal redeploy || kamal deploy

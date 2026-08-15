@@ -49,3 +49,11 @@
 # Ignore Docker-related files
 /.dockerignore
 /Dockerfile*
+
+# Ignore infrastructure, test, and documentation files
+/infra
+/backups
+/test
+/.harlequin.toml
+/DEPLOYMENT.md
+/README.md
