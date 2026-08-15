@@ -103,7 +103,29 @@ bin/kamal deploy
 | **本番 DB コンソール** | `bin/kamal dbc` | 本番 PostgreSQL に直接接続 |
 | **本番コンテナのシェル** | `bin/kamal shell` | 本番コンテナ内に入ってデバッグ |
 | **再起動** | `bin/kamal app restart` | コンテナをゼロダウンタイム再起動 |
-| **DB バックアップ/復元** | `bin/kamal accessory reboot db` | DB コンテナの再起動 |
+| **DB バックアップ取得** | `bin/rails db:backup:remote` | 本番 DB のダンプをローカル `./backups/` に保存 |
+| **ローカル DB への復元** | `bin/rails db:backup:restore_local` | 取得した本番ダンプをローカル開発環境に復元 |
+
+---
+
+## 💾 4. データベースのバックアップ & リストア手順
+
+### (1) 本番 DB のバックアップをローカルにダウンロード
+
+```bash
+# Rake タスクで一発取得 (./backups/production_YYYYMMDD_HHMMSS.dump に保存)
+docker compose run --rm web bin/rails db:backup:remote
+
+# または Kamal コマンドで直接実行 (PostgreSQL カスタム圧縮フォーマット)
+bin/kamal accessory exec db -- "pg_dump -U postgres -Fc modern_rails_production" > "backup_$(date +%Y%m%d_%H%M%S).dump"
+```
+
+### (2) 本番データをローカル開発 DB にリストア（検証・再現用）
+
+```bash
+# 最新のバックアップファイルをローカル DB に適用
+docker compose run --rm web bin/rails db:backup:restore_local
+```
 
 ---
 

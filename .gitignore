@@ -42,3 +42,6 @@
 # Pulumi & Node
 infra/node_modules/
 infra/.pulumi/
+
+# Local DB Backups
+/backups/
