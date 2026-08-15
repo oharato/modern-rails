@@ -17,20 +17,20 @@ ssh:
     - ~/.ssh/id_ed25519
 
 # Kamal-proxy configuration
-# Set ssl: false for IP testing, or ssl: true + host when DNS is configured.
 proxy:
   ssl: false
   host: <%= ENV["SERVER_IP"] || "34.27.174.205" %>
   app_port: 80
-  deploy_timeout: 120s
   healthcheck:
     path: /up
-    interval: 2s
-    timeout: 5s
+    interval: 2
+    timeout: 10
 
-# Credentials for your image host (Docker Hub / Artifact Registry / GitHub Packages)
+# Allow Puma 7 seconds to initialize before proxy healthcheck
+readiness_delay: 7
+
+# Credentials for your image host
 registry:
-  # server: us-central1-docker.pkg.dev
   username: <%= ENV["DOCKER_USERNAME"] || "your-dockerhub-user" %>
   password:
     - KAMAL_REGISTRY_PASSWORD
@@ -48,7 +48,7 @@ env:
     DATABASE_USER: postgres
     SOLID_QUEUE_IN_PUMA: true
 
-# PostgreSQL Accessory Container (Production DB running on same host)
+# PostgreSQL Accessory Container
 accessories:
   db:
     image: postgres:17-alpine
@@ -76,5 +76,6 @@ volumes:
 
 asset_path: /rails/public/assets
 
+# Faster builder configuration with Buildx caching
 builder:
   arch: amd64
