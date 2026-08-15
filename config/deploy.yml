@@ -1,7 +1,7 @@
 service: modern_rails
 
-# Container Image (GCP Artifact Registry in us-central1)
-image: <%= ENV["KAMAL_REGISTRY_SERVER"] || "us-central1-docker.pkg.dev/modern-rails-1786791154/modern-rails-repo" %>/app
+# Container Image in GCP Artifact Registry (server host is automatically prefixed by Kamal)
+image: modern-rails-1786791154/modern-rails-repo/app
 
 # Target Server (Static IP managed by Pulumi)
 servers:
