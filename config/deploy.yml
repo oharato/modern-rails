@@ -18,6 +18,7 @@ proxy:
   ssl: false
   host: <%= ENV["SERVER_IP"] || "34.27.174.205" %>
   app_port: 80
+  deploy_timeout: 120
   healthcheck:
     path: /up
     interval: 2
