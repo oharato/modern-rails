@@ -35,6 +35,8 @@ env:
   secret:
     - RAILS_MASTER_KEY
     - MODERN_RAILS_DATABASE_PASSWORD
+    - BASIC_AUTH_USER
+    - BASIC_AUTH_PASSWORD
   clear:
     RAILS_ENV: production
     DATABASE_HOST: modern_rails-db

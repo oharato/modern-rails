@@ -38,4 +38,6 @@ docker run --rm -it \
   -e RAILS_MASTER_KEY \
   -e POSTGRES_PASSWORD \
   -e MODERN_RAILS_DATABASE_PASSWORD \
+  -e BASIC_AUTH_USER \
+  -e BASIC_AUTH_PASSWORD \
   ghcr.io/basecamp/kamal:latest "$@"
