@@ -1,4 +1,4 @@
-<%= form_with model: task, id: "new_task_form", class: "space-y-3" do |f| %>
+<%= form_with model: task, url: tasks_path, id: "new_task_form", class: "space-y-3" do |f| %>
   <div class="flex flex-col sm:flex-row gap-2">
     <%= f.text_field :title, placeholder: "新しいタスクを入力...", required: true, class: "flex-1 rounded-lg border-slate-300 shadow-sm text-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2 border bg-white" %>
     <div class="flex gap-2">

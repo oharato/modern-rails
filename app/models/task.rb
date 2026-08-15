@@ -9,7 +9,4 @@ class Task < ApplicationRecord
   scope :completed, -> { where(completed: true) }
   scope :pending, -> { where(completed: false) }
   scope :recent, -> { order(created_at: :desc) }
-
-  # Rails 8 / Turbo 8 Morphing & Refresh support
-  broadcasts_refreshes
 end
