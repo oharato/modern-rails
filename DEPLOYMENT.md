@@ -32,7 +32,7 @@ PROJECT_ID="modern-rails-$(date +%s)"
 gcloud projects create "$PROJECT_ID" --name="modern-rails"
 
 # 2. 請求先アカウント（Billing Account）の紐付け
-BILLING_ACCOUNT_ID="YOUR_BILLING_ACCOUNT_ID" # または `gcloud billing accounts list` で確認
+BILLING_ACCOUNT_ID=$(gcloud billing accounts list --format="value(name)" --filter="open=true" | head -n 1)
 gcloud billing projects link "$PROJECT_ID" --billing-account="$BILLING_ACCOUNT_ID"
 
 # 3. 現在のプロジェクトとして設定
@@ -92,8 +92,8 @@ cd ..
 PostgreSQL コンテナがデータを永続化するためのディレクトリを `deploy` ユーザー権限で作成します。
 
 ```bash
-# SERVER_IP を Pulumi の出力結果に置き換えて実行
-SERVER_IP="34.27.174.205"
+# Pulumi の出力からサーバーIPを取得（または pulumi stack output で確認）
+SERVER_IP=$(cd infra && export PULUMI_CONFIG_PASSPHRASE="modern-rails-passphrase" && pulumi stack output serverIp)
 
 # SSH 経由でディレクトリ作成 & パーミッション設定
 ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 deploy@${SERVER_IP} \

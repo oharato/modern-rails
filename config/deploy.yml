@@ -8,7 +8,7 @@ image: <%= ENV["DOCKER_USERNAME"] %>/modern_rails
 # Deploy to these servers (managed by Pulumi)
 servers:
   web:
-    - 34.27.174.205
+    - <%= ENV["SERVER_IP"] || "34.27.174.205" %>
 
 # SSH configuration (using the deploy user created by Pulumi)
 ssh:
@@ -20,7 +20,7 @@ ssh:
 # Set ssl: false for IP testing, or ssl: true + host when DNS is configured.
 proxy:
   ssl: false
-  host: 34.27.174.205
+  host: <%= ENV["SERVER_IP"] || "34.27.174.205" %>
   app_port: 3000
 
 # Credentials for your image host (Docker Hub / Artifact Registry / GitHub Packages)
@@ -45,7 +45,7 @@ env:
 accessories:
   db:
     image: postgres:17-alpine
-    host: 34.27.174.205
+    host: <%= ENV["SERVER_IP"] || "34.27.174.205" %>
     port: "127.0.0.1:5432:5432"
     env:
       clear:
