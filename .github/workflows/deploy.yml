@@ -54,8 +54,8 @@ jobs:
         env:
           GCP_SA_KEY_BASE64: ${{ secrets.GCP_SA_KEY_BASE64 }}
           RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD || 'modern_rails_production_password_2026' }}
-          MODERN_RAILS_DATABASE_PASSWORD: ${{ secrets.MODERN_RAILS_DATABASE_PASSWORD || 'modern_rails_production_password_2026' }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD || secrets.MODERN_RAILS_DATABASE_PASSWORD || 'modern_rails_production_password_2026' }}
+          MODERN_RAILS_DATABASE_PASSWORD: ${{ secrets.MODERN_RAILS_DATABASE_PASSWORD || secrets.POSTGRES_PASSWORD || 'modern_rails_production_password_2026' }}
           BASIC_AUTH_USER: ${{ secrets.BASIC_AUTH_USER || 'admin' }}
           BASIC_AUTH_PASSWORD: ${{ secrets.BASIC_AUTH_PASSWORD || 'password123' }}
         run: |
