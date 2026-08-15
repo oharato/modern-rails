@@ -1,1 +1,16 @@
 @import "tailwindcss";
+
+@layer base {
+  html {
+    font-family: "LINE Seed JP", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 16.5px;
+    letter-spacing: -0.01em;
+  }
+
+  body {
+    font-family: inherit;
+    color: #1e293b;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
