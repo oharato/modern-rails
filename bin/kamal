@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -e
+
+# If native kamal is installed on host, use it
+if command -v kamal >/dev/null 2>&1; then
+  exec kamal "$@"
+fi
+
+# Otherwise, run Kamal via Docker container sharing host Docker socket & SSH keys
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# Ensure SSH agent or ~/.ssh is passed
+SSH_DIR="$HOME/.ssh"
+DOCKER_SOCK="/var/run/docker.sock"
+
+docker run --rm -it \
+  --network host \
+  -v "$DOCKER_SOCK:$DOCKER_SOCK" \
+  -v "$SSH_DIR:/root/.ssh:ro" \
+  -v "$PROJECT_ROOT:/workdir" \
+  -w /workdir \
+  -e KAMAL_REGISTRY_PASSWORD \
+  -e DOCKER_USERNAME \
+  ghcr.io/basecamp/kamal:latest "$@"
