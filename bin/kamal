@@ -1,15 +1,29 @@
 #!/usr/bin/env bash
 set -e
 
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# Load .env if present
+if [ -f "$PROJECT_ROOT/.env" ]; then
+  # export variables from .env
+  set -a
+  source "$PROJECT_ROOT/.env"
+  set +a
+fi
+
+# Load .kamal/secrets if present
+if [ -f "$PROJECT_ROOT/.kamal/secrets" ]; then
+  set -a
+  source "$PROJECT_ROOT/.kamal/secrets" 2>/dev/null || true
+  set +a
+fi
+
 # If native kamal is installed on host, use it
 if command -v kamal >/dev/null 2>&1; then
   exec kamal "$@"
 fi
 
 # Otherwise, run Kamal via Docker container sharing host Docker socket & SSH keys
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-
-# Ensure SSH agent or ~/.ssh is passed
 SSH_DIR="$HOME/.ssh"
 DOCKER_SOCK="/var/run/docker.sock"
 
@@ -21,4 +35,7 @@ docker run --rm -it \
   -w /workdir \
   -e KAMAL_REGISTRY_PASSWORD \
   -e DOCKER_USERNAME \
+  -e RAILS_MASTER_KEY \
+  -e POSTGRES_PASSWORD \
+  -e MODERN_RAILS_DATABASE_PASSWORD \
   ghcr.io/basecamp/kamal:latest "$@"
