@@ -22,6 +22,11 @@ proxy:
   ssl: false
   host: <%= ENV["SERVER_IP"] || "34.27.174.205" %>
   app_port: 80
+  deploy_timeout: 120s
+  healthcheck:
+    path: /up
+    interval: 2s
+    timeout: 5s
 
 # Credentials for your image host (Docker Hub / Artifact Registry / GitHub Packages)
 registry:
