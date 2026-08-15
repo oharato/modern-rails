@@ -1,0 +1,53 @@
+<div id="<%= dom_id(task) %>" class="py-3.5 flex items-center justify-between group transition">
+  <div class="flex items-center gap-3 min-w-0">
+    <!-- Toggle Completion Form -->
+    <%= form_with url: toggle_task_path(task), method: :patch, class: "inline-flex items-center" do %>
+      <button type="submit" class="cursor-pointer focus:outline-none">
+        <% if task.completed %>
+          <div class="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center text-white text-xs shadow-xs">
+            ✓
+          </div>
+        <% else %>
+          <div class="w-5 h-5 rounded-full border-2 border-slate-300 hover:border-indigo-500 transition"></div>
+        <% end %>
+      </button>
+    <% end %>
+
+    <div class="min-w-0">
+      <span class="text-sm font-medium transition <%= task.completed ? 'line-through text-slate-400' : 'text-slate-800' %>">
+        <%= task.title %>
+      </span>
+
+      <div class="flex items-center gap-2 mt-0.5">
+        <% if task.project %>
+          <span class="inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+            <%= task.project.title %>
+          </span>
+        <% end %>
+
+        <span class="inline-flex items-center text-[10px] font-semibold px-1.5 py-0.5 rounded <%= 
+          case task.priority
+          when 'urgent' then 'bg-rose-100 text-rose-700'
+          when 'high' then 'bg-amber-100 text-amber-700'
+          when 'medium' then 'bg-blue-100 text-blue-700'
+          else 'bg-slate-100 text-slate-500'
+          end
+        %>">
+          <%= task.priority.upcase %>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-2">
+    <span class="text-xs text-slate-400 hidden sm:inline">
+      <%= time_ago_in_words(task.created_at) %>前
+    </span>
+
+    <%= button_to task_path(task), method: :delete, data: { turbo_confirm: "タスク「#{task.title}」を削除しますか？" }, class: "text-slate-300 hover:text-rose-600 transition p-1.5 rounded-md hover:bg-rose-50 opacity-0 group-hover:opacity-100 cursor-pointer" do %>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+      </svg>
+    <% end %>
+  </div>
+</div>

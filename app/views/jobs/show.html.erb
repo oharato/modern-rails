@@ -1,0 +1,57 @@
+<div class="max-w-4xl mx-auto space-y-6">
+  <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+      <div>
+        <h1 class="text-2xl font-bold text-slate-800">Solid Queue 非同期ジョブテスト</h1>
+        <p class="text-sm text-slate-500 mt-1">Rails 8 標準のDB駆動バックグラウンドキュー (Redis不要)</p>
+      </div>
+      <%= button_to "新規ジョブをエンキュー", trigger_jobs_path, method: :post, class: "px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium shadow-sm transition cursor-pointer" %>
+    </div>
+
+    <div class="mt-6 prose prose-slate text-sm">
+      <p>
+        Rails 8 では、ActiveJobのデフォルトバックエンドとして <strong>Solid Queue</strong> が採用されています。<br>
+        従来の Sidekiq / Redis のような外部インフラを別途用意することなく、PostgreSQLデータベース上でトランザクション安全に非同期ジョブ・定期実行（Recurring jobs）を処理できます。
+      </p>
+    </div>
+  </div>
+
+  <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+    <h2 class="text-lg font-bold text-slate-800 mb-4">最近のジョブレコード (SolidQueue::Job)</h2>
+
+    <% if @recent_jobs.present? %>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200 text-sm">
+          <thead class="bg-slate-50">
+            <tr>
+              <th class="px-4 py-3 text-left font-medium text-slate-600">ID</th>
+              <th class="px-4 py-3 text-left font-medium text-slate-600">クラス名</th>
+              <th class="px-4 py-3 text-left font-medium text-slate-600">キュー</th>
+              <th class="px-4 py-3 text-left font-medium text-slate-600">作成日時</th>
+              <th class="px-4 py-3 text-left font-medium text-slate-600">状態</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <% @recent_jobs.each do |job| %>
+              <tr>
+                <td class="px-4 py-3 font-mono text-xs text-slate-500">#<%= job.id %></td>
+                <td class="px-4 py-3 font-medium text-slate-800"><%= job.class_name %></td>
+                <td class="px-4 py-3 text-slate-600"><span class="px-2 py-0.5 rounded text-xs bg-slate-100 font-mono"><%= job.queue_name %></span></td>
+                <td class="px-4 py-3 text-slate-500"><%= job.created_at.strftime("%Y-%m-%d %H:%M:%S") %></td>
+                <td class="px-4 py-3">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-emerald-100 text-emerald-800">
+                    Enqueued / Processed
+                  </span>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="text-center py-8 text-slate-400 text-sm">
+        まだジョブは実行されていません。右上の「新規ジョブをエンキュー」ボタンを押してテストしてください。
+      </div>
+    <% end %>
+  </div>
+</div>

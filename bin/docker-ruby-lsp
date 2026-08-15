@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Wrapper to run ruby-lsp inside docker container
+# Working directory fallback
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$PROJECT_DIR" || exit 1
+
+# Execute ruby-lsp inside the running web container, or spin up a one-off container
+if docker compose ps --status running web | grep -q "web"; then
+  exec docker compose exec -T web bundle exec ruby-lsp "$@"
+else
+  exec docker compose run --rm -T --no-deps web bundle exec ruby-lsp "$@"
+fi
