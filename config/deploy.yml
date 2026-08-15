@@ -2,8 +2,8 @@
 service: modern_rails
 
 # Name of the container image.
-# You can push to Docker Hub (e.g. your_username/modern_rails) or GCP Artifact Registry.
-image: modern_rails
+# Must include Docker Hub username (e.g. your_username/modern_rails)
+image: <%= ENV["DOCKER_USERNAME"] %>/modern_rails
 
 # Deploy to these servers (managed by Pulumi)
 servers:
