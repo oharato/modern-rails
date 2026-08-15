@@ -180,22 +180,18 @@ docker compose run --rm web bin/rails db:backup:restore_local
 
 GitHub の `main` ブランチに Pull Request がマージされると、**GitHub Actions が自動でビルド＆ゼロダウンタイムデプロイ（`--skip-prune` 高速モード）** を実行します。
 
-### (1) GitHub Repository Secrets の登録一覧
+### (1) GitHub Repository Secrets の登録一覧（たった 3 つで OK！）
 
 GitHub リポジトリの **Settings > Secrets and variables > Actions > New repository secret** で以下を登録します：
 
-| Secret 名 | 設定する値 / 取得元 | 必須 |
+| Secret 名 | 設定する値 / 取得方法 | 必須 |
 | :--- | :--- | :---: |
-| **`SSH_PRIVATE_KEY`** | `~/.ssh/id_ed25519` のファイル内容全体 | **必須** |
-| **`GCP_SA_KEY_BASE64`** | GCP サービスアカウントキー（Base64形式）※ Artifact Registry 利用時 | **推奨** |
-| **`DOCKER_USERNAME`** | Docker Hub のユーザー名 ※ Docker Hub 利用時 | 任意 |
-| **`KAMAL_REGISTRY_PASSWORD`** | Docker Hub の Access Token ※ Docker Hub 利用時 | 任意 |
-| **`RAILS_MASTER_KEY`** | `config/master.key` のファイル内容 | **必須** |
-| **`POSTGRES_PASSWORD`** | `.env` に設定した DB パスワード | **必須** |
-| **`MODERN_RAILS_DATABASE_PASSWORD`** | `.env` に設定した DB パスワード | **必須** |
-| **`BASIC_AUTH_USER`** | Basic 認証のユーザー名（例: `admin`） | 任意 |
-| **`BASIC_AUTH_PASSWORD`** | Basic 認証のパスワード | 任意 |
-| **`SERVER_IP`** | サーバーの固定IP（未指定時は `34.27.174.205` がデフォルト） | 任意 |
+| **`SSH_PRIVATE_KEY`** | `cat ~/.ssh/id_ed25519` の出力全体 | **必須** |
+| **`RAILS_MASTER_KEY`** | `cat config/master.key` の出力 | **必須** |
+| **`GCP_SA_KEY_BASE64`** | `cd infra && pulumi stack output gcpServiceAccountKeyBase64 --show-secrets` の出力 | **必須** |
+
+> **💡 備考:**
+> - DB パスワードやサーバー IP、Basic 認証のデフォルト設定は内蔵されているため、上記 3 つを登録するだけで自動デプロイが完結します！
 
 ---
 

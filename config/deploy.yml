@@ -1,19 +1,13 @@
-# Name of your application. Used to uniquely configure containers.
 service: modern_rails
 
-# Name of the container image.
-<% if ENV["KAMAL_REGISTRY_SERVER"] %>
-image: <%= ENV["KAMAL_REGISTRY_SERVER"] %>/app
-<% else %>
-image: <%= ENV["DOCKER_USERNAME"] %>/modern_rails
-<% end %>
+# Container Image (GCP Artifact Registry in us-central1)
+image: <%= ENV["KAMAL_REGISTRY_SERVER"] || "us-central1-docker.pkg.dev/modern-rails-1786791154/modern-rails-repo" %>/app
 
-# Deploy to these servers (managed by Pulumi)
+# Target Server (Static IP managed by Pulumi)
 servers:
   web:
     - <%= ENV["SERVER_IP"] || "34.27.174.205" %>
 
-# SSH configuration (using the deploy user created by Pulumi)
 ssh:
   user: deploy
   keys:
@@ -29,23 +23,16 @@ proxy:
     interval: 2
     timeout: 10
 
-# Allow Puma 7 seconds to initialize before proxy healthcheck
 readiness_delay: 7
 
-# Credentials for your image host (GCP Artifact Registry / Docker Hub)
+# GCP Artifact Registry Credentials
 registry:
-<% if ENV["KAMAL_REGISTRY_SERVER"] %>
-  server: <%= ENV["KAMAL_REGISTRY_SERVER"].split("/").first %>
+  server: us-central1-docker.pkg.dev
   username: _json_key_base64
   password:
     - GCP_SA_KEY_BASE64
-<% else %>
-  username: <%= ENV["DOCKER_USERNAME"] || "your-dockerhub-user" %>
-  password:
-    - KAMAL_REGISTRY_PASSWORD
-<% end %>
 
-# Inject ENV variables into containers (secrets come from .kamal/secrets).
+# Secrets injected from .kamal/secrets
 env:
   secret:
     - RAILS_MASTER_KEY
@@ -73,19 +60,16 @@ accessories:
     directories:
       - /home/deploy/postgres-data:/var/lib/postgresql/data
 
-# Aliases
 aliases:
   console: app exec --interactive --reuse "bin/rails console"
   shell: app exec --interactive --reuse "bash"
   logs: app logs -f
   dbc: app exec --interactive --reuse "bin/rails dbconsole"
 
-# Storage
 volumes:
   - "modern_rails_storage:/rails/storage"
 
 asset_path: /rails/public/assets
 
-# Faster builder configuration with Buildx caching
 builder:
   arch: amd64
