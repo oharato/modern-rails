@@ -38,7 +38,9 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           cat << 'EOF' > ~/.ssh/config
           Host *
-            StrictHostKeyChecking accept-new
+            StrictHostKeyChecking no
+            UserKnownHostsFile /dev/null
+            LogLevel ERROR
             ControlMaster auto
             ControlPath ~/.ssh/control-%C
             ControlPersist 10m
@@ -47,7 +49,7 @@ jobs:
             Compression yes
           EOF
           chmod 600 ~/.ssh/config
-          ssh-keyscan -H "${{ secrets.SERVER_IP || '34.27.174.205' }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+          rm -f ~/.ssh/known_hosts
 
       - name: Deploy with Kamal (Fast Mode)
         env:
