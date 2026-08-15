@@ -19,6 +19,9 @@ Rails.application.routes.draw do
   get "jobs/test" => "jobs#show", as: :jobs_test
   post "jobs/trigger" => "jobs#trigger", as: :trigger_jobs
 
+  # Rails 8 Modern Stack Guide
+  get "guide" => "guide#index", as: :guide
+
   # Health Check & PWA
   get "up" => "rails/health#show", as: :rails_health_check
 end
