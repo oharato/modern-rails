@@ -38,3 +38,7 @@
 
 # Kamal secrets
 /.kamal/secrets
+
+# Pulumi & Node
+infra/node_modules/
+infra/.pulumi/
