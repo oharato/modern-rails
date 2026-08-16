@@ -180,18 +180,16 @@ docker compose run --rm web bin/rails db:backup:restore_local
 
 GitHub の `main` ブランチに Pull Request がマージされると、**GitHub Actions が自動でビルド＆ゼロダウンタイムデプロイ（`--skip-prune` 高速モード）** を実行します。
 
-### (1) GitHub Repository Secrets の登録一覧（たった 3 つで OK！）
+### (1) GitHub Repository Secrets の登録（たった 1 個で OK！）
 
-GitHub リポジトリの **Settings > Secrets and variables > Actions > New repository secret** で以下を登録します：
+秘密情報はすべて Rails 標準の暗号化機能（`config/credentials.yml.enc`）で安全に暗号化されているため、GitHub の **Settings > Secrets and variables > Actions > New repository secret** に登録するのは **`RAILS_MASTER_KEY` の 1 つだけ** です！
 
 | Secret 名 | 設定する値 / 取得方法 | 必須 |
 | :--- | :--- | :---: |
-| **`SSH_PRIVATE_KEY`** | `cat ~/.ssh/id_ed25519` の出力全体 | **必須** |
-| **`RAILS_MASTER_KEY`** | `cat config/master.key` の出力 | **必須** |
-| **`GCP_SA_KEY_BASE64`** | `cd infra && pulumi stack output gcpServiceAccountKeyBase64 --show-secrets` の出力 | **必須** |
+| **`RAILS_MASTER_KEY`** | `cat config/master.key` の出力 | **必須（これ 1 個だけ！）** |
 
-> **💡 備考:**
-> - DB パスワードやサーバー IP、Basic 認証のデフォルト設定は内蔵されているため、上記 3 つを登録するだけで自動デプロイが完結します！
+> **💡 The Rails Way:**
+> SSH 秘密鍵、GCP サービスアカウントキー、DB パスワード等はすべて Rails Credentials 内に暗号化保存されており、CI 実行時に `RAILS_MASTER_KEY` を使って自動復号されます。
 
 ---
 
