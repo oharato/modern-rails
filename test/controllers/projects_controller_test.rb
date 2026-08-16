@@ -38,4 +38,14 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_match %(target="project_#{project.id}"), @response.body
     assert_match 'action="remove"', @response.body
   end
+
+  test "should handle project validation failure with Turbo Stream (status 422)" do
+    assert_no_difference -> { @user.projects.count } do
+      post projects_url, params: { project: { title: "", color: "rose" } }, as: :turbo_stream
+    end
+    assert_response :unprocessable_entity
+    assert_includes @response.media_type, "text/vnd.turbo-stream.html"
+    assert_match 'target="new_project_form"', @response.body
+    assert_match 'action="replace"', @response.body
+  end
 end

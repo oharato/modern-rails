@@ -23,24 +23,38 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Set up Ruby & Gems
+      - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.4"
-          bundler-cache: true
+          ruby-version: .ruby-version
 
-      - name: Install Kamal
-        run: gem install kamal -v 2.12.0 --no-document
+      - name: Install Kamal & ActiveSupport
+        run: gem install kamal:2.12.0 activesupport:8.1.3 --no-document
 
       - name: Restore SSH Key from Encrypted Rails Credentials
         env:
           RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           mkdir -p ~/.ssh
-          # Extract SSH private key from Rails encrypted credentials
-          bin/rails runner 'key = Rails.application.credentials.ssh_private_key.to_s.strip; raise "SSH private key not found in credentials!" if key.empty?; File.write(File.expand_path("~/.ssh/id_ed25519"), key + "\n")'
+          # Extract SSH private key from Secrets or Rails encrypted credentials
+          ruby - << 'EOF'
+          require "active_support/encrypted_configuration"
+          key = ENV["SSH_PRIVATE_KEY"].to_s.strip
+          if key.empty?
+            config = ActiveSupport::EncryptedConfiguration.new(
+              config_path: Pathname.new("config/credentials.yml.enc"),
+              key_path: Pathname.new("config/master.key"),
+              env_key: "RAILS_MASTER_KEY",
+              raise_if_missing_key: true
+            )
+            key = config.config[:ssh_private_key].to_s.strip
+          end
+          raise "SSH private key not found!" if key.empty?
+          File.write(File.expand_path("~/.ssh/id_ed25519"), key + "\n")
+          EOF
           chmod 600 ~/.ssh/id_ed25519
-          
+
           # SSH connection multiplexing & known hosts
           cat << 'EOF' > ~/.ssh/config
           Host *
@@ -53,22 +67,16 @@ jobs:
             Compression yes
           EOF
           chmod 600 ~/.ssh/config
-          ssh-keyscan -t ed25519,rsa "34.27.174.205" >> ~/.ssh/known_hosts 2>/dev/null || true
-
-      - name: Ensure PostgreSQL Password Matches
-        env:
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD || secrets.MODERN_RAILS_DATABASE_PASSWORD || 'modern_rails_production_password_2026' }}
-        run: |
-          ssh deploy@34.27.174.205 "docker exec -u postgres modern_rails-db psql -U postgres -c \"ALTER USER postgres WITH PASSWORD '$POSTGRES_PASSWORD';\" 2>/dev/null || true"
+          ssh-keyscan -t ed25519,rsa "${{ secrets.SERVER_IP || '34.27.174.205' }}" >> ~/.ssh/known_hosts 2>/dev/null || true
 
       - name: Deploy with Kamal
         env:
           GCP_SA_KEY_BASE64: ${{ secrets.GCP_SA_KEY_BASE64 }}
           RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD || secrets.MODERN_RAILS_DATABASE_PASSWORD || 'modern_rails_production_password_2026' }}
-          MODERN_RAILS_DATABASE_PASSWORD: ${{ secrets.MODERN_RAILS_DATABASE_PASSWORD || secrets.POSTGRES_PASSWORD || 'modern_rails_production_password_2026' }}
-          BASIC_AUTH_USER: ${{ secrets.BASIC_AUTH_USER || 'admin' }}
-          BASIC_AUTH_PASSWORD: ${{ secrets.BASIC_AUTH_PASSWORD || 'password123' }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          MODERN_RAILS_DATABASE_PASSWORD: ${{ secrets.MODERN_RAILS_DATABASE_PASSWORD }}
+          BASIC_AUTH_USER: ${{ secrets.BASIC_AUTH_USER }}
+          BASIC_AUTH_PASSWORD: ${{ secrets.BASIC_AUTH_PASSWORD }}
+          SERVER_IP: ${{ secrets.SERVER_IP || '34.27.174.205' }}
         run: |
-          kamal lock release 2>/dev/null || true
           kamal deploy

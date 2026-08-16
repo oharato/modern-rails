@@ -33,9 +33,10 @@
           </thead>
           <tbody class="divide-y divide-slate-100">
             <% @recent_jobs.each do |job| %>
+              <% job_name = (job.arguments.is_a?(Hash) && job.arguments["job_class"]) || (job.arguments.is_a?(String) && (JSON.parse(job.arguments)["job_class"] rescue nil)) || job.class_name %>
               <tr>
                 <td class="px-4 py-3 font-mono text-xs text-slate-500">#<%= job.id %></td>
-                <td class="px-4 py-3 font-medium text-slate-800"><%= job.class_name %></td>
+                <td class="px-4 py-3 font-medium text-slate-800"><%= job_name %></td>
                 <td class="px-4 py-3 text-slate-600"><span class="px-2 py-0.5 rounded text-xs bg-slate-100 font-mono"><%= job.queue_name %></span></td>
                 <td class="px-4 py-3 text-slate-500"><%= job.created_at.strftime("%Y-%m-%d %H:%M:%S") %></td>
                 <td class="px-4 py-3">

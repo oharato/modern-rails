@@ -31,6 +31,24 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
     assert task.reload.completed
   end
 
+  test "should fail to create task with another user's project" do
+    other_project = projects(:two)
+    assert_no_difference("@user.tasks.count") do
+      post tasks_url, params: { task: { title: "IDOR Task", project_id: other_project.id } }
+    end
+    assert_redirected_to root_url
+  end
+
+  test "should handle validation failure with Turbo Stream (status 422)" do
+    other_project = projects(:two)
+    assert_no_difference("@user.tasks.count") do
+      post tasks_url, params: { task: { title: "Invalid Task", project_id: other_project.id } }, as: :turbo_stream
+    end
+    assert_response :unprocessable_entity
+    assert_includes @response.media_type, "text/vnd.turbo-stream.html"
+    assert_match 'target="new_task_form"', @response.body
+    assert_match 'action="replace"', @response.body
+  end
   test "should destroy task" do
     task = @user.tasks.create!(title: "Delete Me")
     assert_difference("@user.tasks.count", -1) do

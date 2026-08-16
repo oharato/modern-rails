@@ -9,7 +9,7 @@ class GenerateSummaryJob < ApplicationJob
     sleep 2
 
     # キャッシュを更新
-    Rails.cache.write("user_#{user.id}_stats", {
+    Rails.cache.write(user.stats_cache_key, {
       total_tasks: user.tasks.count,
       completed_tasks: user.tasks.completed.count,
       pending_tasks: user.tasks.pending.count,

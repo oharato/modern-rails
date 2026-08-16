@@ -1,4 +1,9 @@
 <%= form_with model: project, url: projects_path, id: "new_project_form", class: "space-y-3" do |f| %>
+  <% if project.errors.any? %>
+    <div class="p-2.5 text-xs text-rose-600 bg-rose-50 rounded-lg border border-rose-200">
+      <%= project.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
   <div class="flex gap-2">
     <%= f.text_field :title, placeholder: "新規プロジェクト名...", required: true, class: "flex-1 rounded-lg border-slate-300 shadow-sm text-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2 border bg-white" %>
     <%= f.select :color, [["Blue", "blue"], ["Green", "green"], ["Purple", "purple"], ["Amber", "amber"], ["Rose", "rose"]], {}, class: "rounded-lg border-slate-300 shadow-sm text-sm focus:border-indigo-500 focus:ring-indigo-500 px-2 py-2 border bg-white text-slate-700" %>

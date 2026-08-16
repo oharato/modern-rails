@@ -7,4 +7,12 @@ class User < ApplicationRecord
 
   validates :email_address, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   normalizes :email_address, with: ->(e) { e.strip.downcase }
+
+  def stats_cache_key
+    "user_#{id}_stats"
+  end
+
+  def clear_stats_cache
+    Rails.cache.delete(stats_cache_key)
+  end
 end
