@@ -206,6 +206,77 @@ GitHub の `main` ブランチに Pull Request がマージされると、**GitH
 
 ---
 
+## 🔐 8. 秘匿情報（Credentials）の追加・編集・削除手順
+
+新しい API キーや外部連携トークンを追加したい場合、**GitHub の画面で Secret を追加する必要は一切ありません**。Rails の標準コマンドを使ってローカルで安全に追加・削除できます。
+
+### (1) 現在の秘匿情報を確認（復号して表示）
+
+```bash
+docker compose run --rm web bin/rails runner 'puts Rails.application.credentials.config.to_yaml'
+```
+
+---
+
+### (2) 秘匿情報を編集・追加・削除する
+
+お好みのエディタ（`nano`, `vim`, `code` 等）を指定して暗号化ファイルを直接編集します：
+
+```bash
+# 1. Credentials 編集モードを起動（一時ファイルが復号されてエディタが開きます）
+EDITOR="nano" docker compose run --rm -it web bin/rails credentials:edit
+```
+
+エディタ内で YAML 形式で自由にキーを追加・修正・削除して保存終了します：
+
+```yaml
+# 例: 外部 API キーを追加する場合
+secret_key_base: "..."
+ssh_private_key: |
+  -----BEGIN OPENSSH PRIVATE KEY-----
+  ...
+gcp_sa_key_base64: "..."
+postgres_password: "modern_rails_production_password_2026"
+basic_auth_user: "admin"
+basic_auth_password: "..."
+
+# 新しく追加した秘匿情報
+stripe_api_key: "sk_live_1234567890"
+openai_api_key: "sk-proj-abcdef..."
+```
+
+保存してエディタを閉じると、**自動的に AES-256-GCM で再暗号化** されて `config/credentials.yml.enc` に保存されます。
+
+---
+
+### (3) 新しい秘匿情報を Kamal / 本番コンテナに渡す設定
+
+新しいキーを本番アプリや Kamal に渡したい場合は、以下の 2 ファイルに追記します：
+
+#### 1. [`.kamal/secrets`](file:///home/oharato/workspace/modern-rails/.kamal/secrets) にマッピングを追記
+```bash
+# 例: STRIPE_API_KEY を Rails Credentials から抽出
+STRIPE_API_KEY=$(bin/rails runner 'puts Rails.application.credentials.stripe_api_key')
+```
+
+#### 2. [`config/deploy.yml`](file:///home/oharato/workspace/modern-rails/config/deploy.yml) の `env.secret` に追記
+```yaml
+env:
+  secret:
+    - RAILS_MASTER_KEY
+    - STRIPE_API_KEY
+```
+
+#### 3. Git コミットして push するだけ！
+```bash
+git add config/credentials.yml.enc .kamal/secrets config/deploy.yml
+git commit -m "feat: add Stripe API key to encrypted credentials"
+git push origin main
+```
+> **🎉 これだけで GitHub Actions が `RAILS_MASTER_KEY` を使って自動復号し、本番コンテナに安全に反映されます！**
+
+---
+
 ## 🧹 リソースの完全破棄（課金防止・後片付け）
 
 検証が完了し、クラウド上のリソースをすべて削除したい場合は以下の手順を実行します：
