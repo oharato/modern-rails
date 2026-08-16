@@ -2,6 +2,7 @@ service: modern_rails
 
 # Healthcheck and deploy timeouts
 deploy_timeout: 30
+retain_containers: 3
 
 # Container Image in GCP Artifact Registry (server host is automatically prefixed by Kamal)
 image: modern-rails-1786791154/modern-rails-repo/app

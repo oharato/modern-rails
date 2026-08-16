@@ -54,6 +54,7 @@
 /infra
 /backups
 /test
+/docs
 /.harlequin.toml
 /DEPLOYMENT.md
 /README.md

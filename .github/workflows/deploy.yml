@@ -79,4 +79,4 @@ jobs:
           BASIC_AUTH_PASSWORD: ${{ secrets.BASIC_AUTH_PASSWORD }}
           SERVER_IP: ${{ secrets.SERVER_IP || '34.27.174.205' }}
         run: |
-          kamal deploy
+          kamal redeploy || kamal deploy
