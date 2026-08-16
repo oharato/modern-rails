@@ -1,5 +1,8 @@
 service: modern_rails
 
+# Allow up to 120s for Ruby 4 + Puma cold boot and healthcheck on e2-micro
+deploy_timeout: 120
+
 # Container Image in GCP Artifact Registry (server host is automatically prefixed by Kamal)
 image: modern-rails-1786791154/modern-rails-repo/app
 
