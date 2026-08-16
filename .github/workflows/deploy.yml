@@ -55,9 +55,20 @@ jobs:
           chmod 600 ~/.ssh/config
           ssh-keyscan -t ed25519,rsa "34.27.174.205" >> ~/.ssh/known_hosts 2>/dev/null || true
 
+      - name: Ensure PostgreSQL Password Matches
+        env:
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD || secrets.MODERN_RAILS_DATABASE_PASSWORD || 'modern_rails_production_password_2026' }}
+        run: |
+          ssh deploy@34.27.174.205 "docker exec -u postgres modern_rails-db psql -U postgres -c \"ALTER USER postgres WITH PASSWORD '$POSTGRES_PASSWORD';\" 2>/dev/null || true"
+
       - name: Deploy with Kamal
         env:
+          GCP_SA_KEY_BASE64: ${{ secrets.GCP_SA_KEY_BASE64 }}
           RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD || secrets.MODERN_RAILS_DATABASE_PASSWORD || 'modern_rails_production_password_2026' }}
+          MODERN_RAILS_DATABASE_PASSWORD: ${{ secrets.MODERN_RAILS_DATABASE_PASSWORD || secrets.POSTGRES_PASSWORD || 'modern_rails_production_password_2026' }}
+          BASIC_AUTH_USER: ${{ secrets.BASIC_AUTH_USER || 'admin' }}
+          BASIC_AUTH_PASSWORD: ${{ secrets.BASIC_AUTH_PASSWORD || 'password123' }}
         run: |
           kamal lock release 2>/dev/null || true
           kamal deploy
