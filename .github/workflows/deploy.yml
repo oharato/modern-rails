@@ -38,7 +38,7 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           # Extract SSH private key from Rails encrypted credentials
-          bin/rails runner 'File.write(File.expand_path("~/.ssh/id_ed25519"), Rails.application.credentials.ssh_private_key.to_s)'
+          bin/rails runner 'key = Rails.application.credentials.ssh_private_key.to_s.strip; raise "SSH private key not found in credentials!" if key.empty?; File.write(File.expand_path("~/.ssh/id_ed25519"), key + "\n")'
           chmod 600 ~/.ssh/id_ed25519
           
           # SSH connection multiplexing & known hosts
