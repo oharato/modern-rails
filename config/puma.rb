@@ -24,8 +24,18 @@
 # Any libraries that use a connection pool or another resource pool should
 # be configured to provide at least as many connections as the number of
 # threads. This includes Active Record's `pool` parameter in `database.yml`.
-threads_count = ENV.fetch("RAILS_MAX_THREADS", 3)
+#
+# GCP e2-micro（メモリ1GB）向け最適化:
+# - WEB_CONCURRENCY=0 でクラスタモードを無効化（単一プロセス）
+# - RAILS_MAX_THREADS=2 でスレッド数を最小化し、メモリ消費を抑制
+# - これにより Puma のメモリフットプリントを大幅に削減し、スワップを防止
+threads_count = ENV.fetch("RAILS_MAX_THREADS", 2)
 threads threads_count, threads_count
+
+# WEB_CONCURRENCY=0 でクラスタモード（マルチワーカー）を無効化する。
+# e2-micro のような低メモリ環境では、ワーカーを増やすとメモリ不足でスワップが多発する。
+workers_count = ENV.fetch("WEB_CONCURRENCY", 0).to_i
+workers workers_count if workers_count >= 1
 
 # Specifies the `port` that Puma will listen on to receive requests; default is 3000.
 port ENV.fetch("PORT", 3000)
