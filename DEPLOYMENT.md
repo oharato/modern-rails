@@ -16,8 +16,7 @@
   │
   └── ② Kamal 2 CLI ────────────> SSH (deploy@34.27.174.205)
                                   ├── Kamal-proxy (リバースプロキシ & ゼロダウンタイム切替)
-                                  ├── Rails 8 Web コンテナ (Puma + Solid Queue + Solid Cache)
-                                  └── PostgreSQL 17 コンテナ (Accessory DB / データ永続化)
+                                  └── Rails 8 Web コンテナ (Puma + Solid Queue + Solid Cache / SQLite)
 ```
 
 ---
@@ -89,16 +88,9 @@ cd ..
 
 ### STEP 4: サーバー側の事前ディレクトリ & 権限の準備
 
-PostgreSQL コンテナがデータを永続化するためのディレクトリを `deploy` ユーザー権限で作成します。
-
-```bash
-# Pulumi の出力からサーバーIPを取得（または pulumi stack output で確認）
-SERVER_IP=$(cd infra && export PULUMI_CONFIG_PASSPHRASE="modern-rails-passphrase" && pulumi stack output serverIp)
-
-# SSH 経由でディレクトリ作成 & パーミッション設定
-ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 deploy@${SERVER_IP} \
-  "mkdir -p /home/deploy/postgres-data && chmod 700 /home/deploy/postgres-data"
-```
+SQLite のデータは Rails の `storage/` ディレクトリに保存されます。
+Kamal の `volumes` 設定（`modern_rails_storage:/rails/storage`）により永続化されるため、
+追加のディレクトリ作成は不要です。
 
 ---
 
@@ -113,10 +105,8 @@ cat << 'EOF' > .env
 DOCKER_USERNAME="your-dockerhub-username"
 KAMAL_REGISTRY_PASSWORD="dckr_pat_your_dockerhub_token_or_password"
 
-# Rails & データベース秘密鍵
+# Rails 秘密鍵
 RAILS_MASTER_KEY="your-rails-master-key-from-config-master-key"
-POSTGRES_PASSWORD="modern_rails_production_password_2026"
-MODERN_RAILS_DATABASE_PASSWORD="modern_rails_production_password_2026"
 EOF
 ```
 
@@ -125,7 +115,7 @@ EOF
 ### STEP 6: Kamal による初回セットアップ & デプロイ
 
 ```bash
-# 初回サーバーセットアップ & コンテナ起動（Docker、PostgreSQL、SSLプロキシ、Rails）
+# 初回サーバーセットアップ & コンテナ起動（Docker、SSLプロキシ、Rails）
 bin/kamal setup
 ```
 
@@ -143,7 +133,7 @@ bin/kamal deploy
 | :--- | :--- | :--- |
 | **本番ログ確認** | `bin/kamal logs` | Rails コンテナのログをリアルタイム tail |
 | **本番 Rails コンソール** | `bin/kamal console` | 本番環境上で `rails c` をインタラクティブ実行 |
-| **本番 DB コンソール** | `bin/kamal dbc` | 本番 PostgreSQL に直接接続して SQL 実行 |
+| **本番 DB コンソール** | `bin/kamal dbc` | 本番 SQLite に直接接続して SQL 実行 |
 | **本番コンテナのシェル** | `bin/kamal shell` | 本番コンテナ内に入ってデバッグ |
 | **アプリ再起動** | `bin/kamal app restart` | コンテナをゼロダウンタイム再起動 |
 | **DB バックアップ取得** | `docker compose run --rm web bin/rails db:backup:remote` | 本番 DB のダンプをローカル `./backups/` に保存 |
@@ -153,25 +143,20 @@ bin/kamal deploy
 
 ## 💾 データベースのバックアップ & リストア詳細
 
-### (1) 本番 DB のバックアップをローカルにダウンロード
+### (1) 本番 DB（SQLite）のバックアップをローカルにダウンロード
 
 ```bash
-# 【推奨】Rake タスクで一発取得 (./backups/production_YYYYMMDD_HHMMSS.dump に保存)
-docker compose run --rm web bin/rails db:backup:remote
+# Kamal コマンドで SQLite ファイルを直接コピー
+bin/kamal app exec -- "cp storage/production.sqlite3 storage/production_backup_$(date +%Y%m%d_%H%M%S).sqlite3"
 
-# または Kamal コマンドで直接実行 (PostgreSQL カスタム圧縮形式)
-bin/kamal accessory exec db -- "pg_dump -U postgres -Fc modern_rails_production" > "backup_$(date +%Y%m%d_%H%M%S).dump"
+# または scp でローカルに取得（SERVER_IP を設定済みの場合）
+scp -i ~/.ssh/id_ed25519 deploy@${SERVER_IP}:/home/deploy/modern_rails_storage/production.sqlite3 ./backups/
 ```
 
-> **💡 `-Fc` (Custom Format) のメリット:**
-> - 自動で高圧縮がかかり、ファイルサイズが数分の一になります。
-> - `pg_restore` によるテーブルごとの部分復元や、並行リストア（`-j 4`）に対応します。
-
-### (2) 取得した本番データをローカル開発 DB にリストア（検証・再現用）
+### (2) 取得した本番データをローカル開発 DB にコピー（検証・再現用）
 
 ```bash
-# ./backups/ 内の最新のバックアップファイルをローカル DB に適用
-docker compose run --rm web bin/rails db:backup:restore_local
+cp backups/production.sqlite3 storage/development.sqlite3
 ```
 
 ---
@@ -228,7 +213,6 @@ ssh_private_key: |
   -----BEGIN OPENSSH PRIVATE KEY-----
   ...
 gcp_sa_key_base64: "..."
-postgres_password: "modern_rails_production_password_2026"
 basic_auth_user: "admin"
 basic_auth_password: "..."
 
