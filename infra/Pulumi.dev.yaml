@@ -4,7 +4,7 @@ config:
   gcp:region: us-central1
   gcp:zone: us-central1-a
   modern-rails-infra:machineType: e2-micro
-  modern-rails-infra:domain: 'ochans.com'
+  modern-rails-infra:domain: 'modern-rails'
   cloudflare:apiToken:
-    secure: v1:s6jWfx19osCe6SiI:BNyRXO1yQjmuqqCzesl4DHfXgrM36WzQLr3kCwVZBieP5k+GUb2rG0hSHfNmoMERDaFVBcdti8CgJROwz1h96JLyYx2d
+    secure: v1:izcMFHp9tvUoeV+4:PW8pTcVSK8ZkENd1sQZ/Ym43Yax01BOxRjv0XDi6163I2g+kr+GlRLHRH+XWUXm6lHl9fmgpl+9/7rSawUYs7qoARYS6
   modern-rails-infra:cloudflareZoneId: 1f851618f5cd4053301cee5eb4f728eb

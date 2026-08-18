@@ -59,15 +59,11 @@ if [ -n "$CLOUDFLARE_ZONE_ID" ]; then
   echo "  ✓ modern-rails-infra:cloudflareZoneId = ${CLOUDFLARE_ZONE_ID}"
 fi
 
-if [ -n "$CLOUDFLARE_DOMAIN" ]; then
-  pulumi config set modern-rails-infra:domain "$CLOUDFLARE_DOMAIN"
-  echo "  ✓ modern-rails-infra:domain = ${CLOUDFLARE_DOMAIN}"
-fi
+# Record name for Cloudflare DNS ("@" for apex domain, or "modern-rails" for subdomain)
+RECORD_NAME="${CLOUDFLARE_DOMAIN:-${DOMAIN:-@}}"
+pulumi config set modern-rails-infra:domain "$RECORD_NAME"
+echo "  ✓ modern-rails-infra:domain = ${RECORD_NAME}"
 
-if [ -n "$DOMAIN" ]; then
-  pulumi config set modern-rails-infra:domain "$DOMAIN"
-  echo "  ✓ modern-rails-infra:domain = ${DOMAIN}"
-fi
 
 echo ""
 echo "🎉 Pulumi configuration successfully updated!"
