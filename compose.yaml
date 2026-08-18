@@ -11,6 +11,7 @@ services:
       - "3000:3000"
     environment:
       RAILS_ENV: development
+      RAILS_LOG_TO_STDOUT: "true"
     tty: true
     stdin_open: true
 
@@ -24,6 +25,7 @@ services:
       - bundle_data:/usr/local/bundle
     environment:
       RAILS_ENV: development
+      RAILS_LOG_TO_STDOUT: "true"
     depends_on:
       - web
     restart: on-failure
