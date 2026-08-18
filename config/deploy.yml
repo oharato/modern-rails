@@ -2,6 +2,7 @@ service: modern_rails
 
 # Healthcheck and deploy timeouts
 deploy_timeout: 30
+stop_timeout: 5
 retain_containers: 3
 
 # Container Image in GCP Artifact Registry (server host is automatically prefixed by Kamal)
@@ -26,10 +27,10 @@ proxy:
   app_port: 80
   healthcheck:
     path: /up
-    interval: 2
-    timeout: 10
+    interval: 1
+    timeout: 3
 
-readiness_delay: 7
+readiness_delay: 1
 
 # GCP Artifact Registry Credentials
 registry:

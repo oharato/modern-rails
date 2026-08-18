@@ -46,6 +46,10 @@ plugin :tmp_restart
 # Run the Solid Queue supervisor inside of Puma for single-server deployments
 plugin :solid_queue if ENV["SOLID_QUEUE_IN_PUMA"]
 
+# Set timeout for faster shutdown during deployment / container restart
+drain_on_shutdown true if respond_to?(:drain_on_shutdown)
+force_shutdown_after 5 if respond_to?(:force_shutdown_after)
+
 # Specify the PID file. Defaults to tmp/pids/server.pid in development.
 # In other environments, only set the PID file if requested.
 pidfile ENV["PIDFILE"] if ENV["PIDFILE"]
