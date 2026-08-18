@@ -79,4 +79,5 @@ jobs:
           BASIC_AUTH_PASSWORD: ${{ secrets.BASIC_AUTH_PASSWORD }}
           SERVER_IP: ${{ secrets.SERVER_IP || '34.27.174.205' }}
         run: |
+          kamal lock release 2>/dev/null || true
           kamal redeploy || kamal deploy
