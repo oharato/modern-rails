@@ -72,7 +72,7 @@ graph TD
   - 最終ステージ（`FROM base AS final`）のイメージサイズを限界まで削減し、初回 pull やキャッシュ更新時の転送負荷を半減させます。
 - **改修内容**:
   1. **ベースパッケージの精査**:
-     - 実行時に不要なツール（ビルド時のみ使う `postgresql-client` など）をビルドステージのみに限定し、ランタイムは `libpq5` のみに絞る。
+     - 実行時に不要なツールをビルドステージのみに限定し、ランタイムは最小限（`libjemalloc2`, `libvips42` 等）に絞る（SQLiteはコンパイル不要でGem完結）。
   2. **不要ファイルの徹底除外**:
      - `.dockerignore` でドキュメント（`docs/`）、テスト、スクラッチファイルがコンテナイメージに混入しないよう完全除外。
   3. **レイヤー順序の固定**:
@@ -83,7 +83,7 @@ graph TD
 ### アプローチ 3: Kamal `redeploy` の CI パイプライン統合
 
 - **仕組み**:
-  - 通常のコード変更デプロイでは、すでに起動している PostgreSQL accessory や Kamal-proxy の再設定をスキップし、アプリコンテナのローリングアップデートのみを行う `kamal redeploy` を活用します。
+  - 通常のコード変更デプロイでは、すでに起動している Kamal-proxy の再設定をスキップし、アプリコンテナのローリングアップデートのみを行う `kamal redeploy` を活用します。
 - **改修内容**:
   - `.github/workflows/deploy.yml` において、初回セットアップ以外は `kamal redeploy` を実行するフローとし、周辺コンテナのヘルスチェック・セットアップオーバーヘッドを削減。
 
@@ -92,7 +92,7 @@ graph TD
 ## 📋 実施ステップと検証手順
 
 1. **Step 1: `Dockerfile` & `.dockerignore` のスリム化**
-   - ランタイム依存関係の最小化（`postgresql-client` → `libpq5` 等）。
+   - ランタイム依存関係の最小化。
    - 不要ファイルの COPY 防止。
 2. **Step 2: `config/deploy.yml` のキャッシュ保持設定の追加**
    - `retain_containers: 3`

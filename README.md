@@ -1,6 +1,6 @@
-# Modern Rails 8 + Docker Compose + PostgreSQL 17 学習用スターターキット
+# Modern Rails 8 + Docker Compose + SQLite 3 学習用スターターキット
 
-最新の **Ruby on Rails 8**、**PostgreSQL 17**、**Docker Compose** を用いたモダンなフルスタックWebアプリケーション環境です。
+最新の **Ruby on Rails 8**、**SQLite 3**、**Docker Compose** を用いたモダンなフルスタックWebアプリケーション環境です。
 
 > 📖 **インフラ構築（Pulumi）および本番デプロイ（Kamal 2）の手順は [DEPLOYMENT.md](file:///home/oharato/workspace/modern-rails/DEPLOYMENT.md) にまとめています。**
 
@@ -12,7 +12,7 @@
 | :--- | :--- | :--- |
 | **Ruby** | `4.0` (Slim) | 最新のRuby 4系ランタイム |
 | **Ruby on Rails** | `8.0` | 最新メジャーバージョン（Solid family標準搭載） |
-| **PostgreSQL** | `17` (Alpine) | 高信頼性リレーショナルデータベース |
+| **SQLite** | `3.x` | 高速・軽量な組み込みリレーショナルデータベース |
 | **CSS Framework** | **Tailwind CSS v4** | `tailwindcss-rails`（Node.js不要のネイティブビルド） |
 | **JavaScript** | **Importmap + Turbo 8 + Stimulus** | Node.js/npm不要のモダンフロントエンド |
 | **Job Queue** | **Solid Queue** | Redis不要のDB駆動バックグラウンドキュー |
@@ -35,11 +35,11 @@ docker compose build web
 
 ### 2. Rails 8 アプリケーションの新規生成
 ```bash
-# 最新のRails 8プロジェクトをPostgreSQL & Tailwind CSS構成で初期化
+# 最新のRails 8プロジェクトをSQLite & Tailwind CSS構成で初期化
 docker compose run --rm --no-deps web bundle exec rails new . \
   --name=modern_rails \
   --force \
-  --database=postgresql \
+  --database=sqlite3 \
   --css=tailwind
 ```
 
@@ -100,7 +100,7 @@ docker compose up -d
 - `User`, `Session`, `Current` モデルと `Authentication` concern が自動生成され、Cookieセッションによる堅牢な認証が標準で動作します。
 
 ### 2. Solid Trio (Redis不要のモダンアーキテクチャ)
-- **Solid Queue**: PostgreSQLのテーブルを活用した非同期ジョブ実行。本アプリの「ジョブ実行テスト」画面（`/jobs/test`）で確認できます。
+- **Solid Queue**: SQLiteのテーブルを活用した非同期ジョブ実行。本アプリの「ジョブ実行テスト」画面（`/jobs/test`）で確認できます。
 - **Solid Cache**: DB内にキャッシュを保持する仕組み。ダッシュボードの統計情報が `Rails.cache.fetch` で高速キャッシュされています。
 - **Solid Cable**: RedisなしでAction Cable/Turbo Streamsのリアルタイム通信を実現。
 
@@ -172,22 +172,24 @@ docker compose up -d
 
 ## 🔍 データベース管理 (Harlequin TUI)
 
-ターミナルベースの高速SQL IDE **[Harlequin](https://harlequin.sh/)** を使って、開発環境およびテスト環境のPostgreSQLデータベースを閲覧・操作できます。
+ターミナルベースの高速SQL IDE **[Harlequin](https://harlequin.sh/)** を使って、開発環境およびテスト環境のSQLiteデータベースを閲覧・操作できます。
 
 プロジェクトルートに [`.harlequin.toml`](file:///home/oharato/workspace/modern-rails/.harlequin.toml) が配置されているため、追加オプション不要で接続可能です。
 
 ### 1. インストール (未導入の場合)
 ```bash
-uv tool install "harlequin[postgres]"
+uv tool install "harlequin[sqlite]"
+# または
+uv tool install harlequin
 ```
 
 ### 2. 起動方法
 
 ```bash
-# 開発環境 DB (modern_rails_development) に接続
+# 開発環境 DB (storage/development.sqlite3) に接続
 harlequin
 
-# テスト環境 DB (modern_rails_test) に接続
+# テスト環境 DB (storage/test.sqlite3) に接続
 harlequin -P test
 ```
 

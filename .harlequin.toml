@@ -4,17 +4,9 @@
 default_profile = "dev"
 
 [profiles.dev]
-adapter = "postgres"
-host = "localhost"
-port = 5432
-user = "postgres"
-password = "password"
-dbname = "modern_rails_development"
+adapter = "sqlite"
+conn_str = ["storage/development.sqlite3"]
 
 [profiles.test]
-adapter = "postgres"
-host = "localhost"
-port = 5432
-user = "postgres"
-password = "password"
-dbname = "modern_rails_test"
+adapter = "sqlite"
+conn_str = ["storage/test.sqlite3"]

@@ -105,13 +105,13 @@
       </div>
       <div>
         <h2 class="text-2xl font-bold text-slate-800">Solid Trio：Redis 不要の DB 駆動アーキテクチャ</h2>
-        <p class="text-sm text-slate-500">PostgreSQL / SQLite だけでキュー・キャッシュ・WebSocket を完結</p>
+        <p class="text-sm text-slate-500">SQLite だけでキュー・キャッシュ・WebSocket を完結</p>
       </div>
     </div>
 
     <p class="text-sm text-slate-600 leading-relaxed">
       Rails 7 までは、非同期ジョブ（Sidekiq）やキャッシュ、Action Cable に Redis サーバーがほぼ必須でした。<br>
-      Rails 8 では、3つの <strong>Solid ファミリー</strong> が標準搭載され、単一のデータベース（PostgreSQL）のみで全機能がトランザクション安全に動作します。
+      Rails 8 では、3つの <strong>Solid ファミリー</strong> が標準搭載され、単一のデータベース（SQLite）のみで全機能がトランザクション安全に動作します。
     </p>
 
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
