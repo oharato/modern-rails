@@ -24,6 +24,8 @@ services:
       - bundle_data:/usr/local/bundle
     environment:
       RAILS_ENV: development
+    depends_on:
+      - web
     restart: on-failure
 
 volumes:
