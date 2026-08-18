@@ -1,16 +1,4 @@
 services:
-  db:
-    image: postgres:17-alpine
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: modern_rails_development
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-
   web:
     build:
       context: .
@@ -23,11 +11,6 @@ services:
       - "3000:3000"
     environment:
       RAILS_ENV: development
-      DATABASE_HOST: db
-      DATABASE_USER: postgres
-      DATABASE_PASSWORD: password
-    depends_on:
-      - db
     tty: true
     stdin_open: true
 
@@ -41,13 +24,7 @@ services:
       - bundle_data:/usr/local/bundle
     environment:
       RAILS_ENV: development
-      DATABASE_HOST: db
-      DATABASE_USER: postgres
-      DATABASE_PASSWORD: password
-    depends_on:
-      - db
     restart: on-failure
 
 volumes:
-  postgres_data:
   bundle_data:

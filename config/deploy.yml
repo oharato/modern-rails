@@ -40,38 +40,20 @@ registry:
 env:
   secret:
     - RAILS_MASTER_KEY
-    - MODERN_RAILS_DATABASE_PASSWORD
     - BASIC_AUTH_USER
     - BASIC_AUTH_PASSWORD
   clear:
     RAILS_ENV: production
-    DATABASE_HOST: modern_rails-db
-    DATABASE_USER: postgres
     SOLID_QUEUE_IN_PUMA: true
 
-# PostgreSQL Accessory Container
-accessories:
-  db:
-    image: postgres:17-alpine
-    host: <%= ENV["SERVER_IP"] || "34.27.174.205" %>
-    port: "127.0.0.1:5432:5432"
-    env:
-      clear:
-        POSTGRES_USER: postgres
-        POSTGRES_DB: modern_rails_production
-      secret:
-        - POSTGRES_PASSWORD
-    directories:
-      - /home/deploy/postgres-data:/var/lib/postgresql/data
+volumes:
+  - "modern_rails_storage:/rails/storage"
 
 aliases:
   console: app exec --interactive --reuse "bin/rails console"
   shell: app exec --interactive --reuse "bash"
   logs: app logs -f
   dbc: app exec --interactive --reuse "bin/rails dbconsole"
-
-volumes:
-  - "modern_rails_storage:/rails/storage"
 
 asset_path: /rails/public/assets
 
