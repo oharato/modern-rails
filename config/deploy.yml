@@ -20,7 +20,9 @@ ssh:
 # Kamal-proxy configuration
 proxy:
   ssl: false
-  host: <%= ENV["SERVER_IP"] || "34.27.174.205" %>
+  hosts:
+    - <%= ENV["DOMAIN"] || "modern-rails.ohchans.com" %>
+    - <%= ENV["SERVER_IP"] || "34.27.174.205" %>
   app_port: 80
   healthcheck:
     path: /up
