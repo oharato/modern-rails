@@ -1,5 +1,6 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as gcp from "@pulumi/gcp";
+import * as cloudflare from "@pulumi/cloudflare";
 import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
@@ -11,6 +12,10 @@ const project = gcpConfig.require("project");
 const region = gcpConfig.get("region") || "us-central1";
 const zone = gcpConfig.get("zone") || "us-central1-a";
 const machineType = config.get("machineType") || "e2-micro"; // e2-micro is eligible for GCP Always Free
+
+// Cloudflare Config
+const cloudflareZoneId = config.get("cloudflareZoneId");
+const domainName = config.get("domain") || "@"; // "@" for apex domain or subdomain name
 
 // Read SSH public key (fallback to default if not present)
 const sshKeyPath = path.join(os.homedir(), ".ssh", "id_ed25519.pub");
@@ -163,6 +168,67 @@ const instance = new gcp.compute.Instance("modern-rails-server", {
   allowStoppingForUpdate: true,
 }, { dependsOn: [staticIp, webFirewall, sshFirewall] });
 
+// -----------------------------------------------------------------------------
+// 6. Cloudflare CDN & HTTPS Configuration
+// -----------------------------------------------------------------------------
+let cfHostname: pulumi.Output<string> | undefined;
+
+if (cloudflareZoneId) {
+  // A Record with Proxied (Orange Cloud) enabled for CDN, WAF and Edge SSL
+  const dnsRecord = new cloudflare.DnsRecord("modern-rails-dns-record", {
+    zoneId: cloudflareZoneId,
+    name: domainName,
+    type: "A",
+    content: staticIp.address,
+    proxied: true,
+    ttl: 1, // Auto
+    comment: "Managed by Pulumi - Modern Rails Production Web Server",
+  });
+  cfHostname = dnsRecord.name;
+
+  // SSL/TLS Encryption Mode (flexible: Cloudflare -> HTTP(80) Origin)
+  new cloudflare.ZoneSetting("modern-rails-ssl-mode", {
+    zoneId: cloudflareZoneId,
+    settingId: "ssl",
+    value: "flexible",
+  });
+
+  // Always Use HTTPS (Automatic 301 redirect from HTTP to HTTPS)
+  new cloudflare.ZoneSetting("modern-rails-always-use-https", {
+    zoneId: cloudflareZoneId,
+    settingId: "always_use_https",
+    value: "on",
+  });
+
+  // Automatic HTTPS Rewrites (rewrite insecure http:// links to https://)
+  new cloudflare.ZoneSetting("modern-rails-auto-https-rewrites", {
+    zoneId: cloudflareZoneId,
+    settingId: "automatic_https_rewrites",
+    value: "on",
+  });
+
+  // Minimum TLS Version (1.2+)
+  new cloudflare.ZoneSetting("modern-rails-min-tls-version", {
+    zoneId: cloudflareZoneId,
+    settingId: "min_tls_version",
+    value: "1.2",
+  });
+
+  // Brotli Compression
+  new cloudflare.ZoneSetting("modern-rails-brotli", {
+    zoneId: cloudflareZoneId,
+    settingId: "brotli",
+    value: "on",
+  });
+
+  // HTTP/3 (QUIC)
+  new cloudflare.ZoneSetting("modern-rails-http3", {
+    zoneId: cloudflareZoneId,
+    settingId: "http3",
+    value: "on",
+  });
+}
+
 // Outputs
 export const serverIp = staticIp.address;
 export const serverName = instance.name;
@@ -170,3 +236,4 @@ export const registryUrl = pulumi.interpolate`${region}-docker.pkg.dev/${project
 export const gcpServiceAccountKeyBase64 = deployerKey.privateKey;
 export const sshCommand = pulumi.interpolate`ssh -i ~/.ssh/id_ed25519 deploy@${staticIp.address}`;
 export const kamalDeployServer = staticIp.address;
+export const cloudflareHostname = cfHostname;

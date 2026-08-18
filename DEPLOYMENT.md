@@ -263,6 +263,19 @@ git push origin main
 
 ---
 
+## 🌐 Cloudflare CDN 導入 & HTTPS 化（Pulumi）
+
+Cloudflare による CDN キャッシュ、DDoS 防御、およびエッジ SSL（常時 HTTPS 化）を Pulumi で定義・管理する手順は、以下の詳細手順書にまとめています。
+
+👉 **[Cloudflare CDN 導入 & HTTPS 化手順書 (docs/CLOUDFLARE_HTTPS_SETUP.md)](file:///home/oharato/workspace/modern-rails/docs/CLOUDFLARE_HTTPS_SETUP.md)**
+
+### 主な設定概要:
+1. `@pulumi/cloudflare` による DNS A レコード（`proxied: true`）の自動登録
+2. `always_use_https: "on"` による HTTP から HTTPS への自動 301 リダイレクト
+3. Rails 側での `config.assume_ssl = true` によるリダイレクトループ防止
+
+---
+
 ## 🧹 リソースの完全破棄（課金防止・後片付け）
 
 検証が完了し、クラウド上のリソースをすべて削除したい場合は以下の手順を実行します：

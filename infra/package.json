@@ -3,7 +3,14 @@
   "version": "1.0.0",
   "description": "GCP infrastructure for Modern Rails 8 with Pulumi and Kamal",
   "main": "index.ts",
+  "scripts": {
+    "config:sync": "../script/apply-infra-config.sh",
+    "preview": "pulumi preview",
+    "up": "pulumi up --yes",
+    "destroy": "pulumi destroy --yes"
+  },
   "dependencies": {
+    "@pulumi/cloudflare": "^6.19.0",
     "@pulumi/gcp": "^8.18.0",
     "@pulumi/pulumi": "^3.150.0"
   },
