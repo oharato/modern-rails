@@ -6,37 +6,28 @@ on:
     - cron: "0 4 * * 0"
   workflow_dispatch:
 
-concurrency:
-  group: production-deploy
-  cancel-in-progress: false
-
 jobs:
   cleanup:
     name: Prune Old Docker Containers & Images
     runs-on: ubuntu-latest
-    timeout-minutes: 10
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
-      - name: Set up Ruby & Gems
+      - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.4"
-          bundler-cache: true
+          ruby-version: .ruby-version
 
       - name: Install Kamal
         run: gem install kamal -v 2.12.0 --no-document
 
-      - name: Restore SSH Key from Encrypted Rails Credentials
-        env:
-          RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+      - name: Configure High-Speed SSH with Connection Multiplexing
         run: |
           mkdir -p ~/.ssh
-          bin/rails runner 'File.write(File.expand_path("~/.ssh/id_ed25519"), Rails.application.credentials.ssh_private_key.to_s)'
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          
           cat << 'EOF' > ~/.ssh/config
           Host *
             StrictHostKeyChecking accept-new
@@ -48,10 +39,16 @@ jobs:
             Compression yes
           EOF
           chmod 600 ~/.ssh/config
-          ssh-keyscan -t ed25519,rsa "34.27.174.205" >> ~/.ssh/known_hosts 2>/dev/null || true
+          rm -f ~/.ssh/known_hosts ~/.ssh/known_hosts.old
+          ssh-keyscan -t ed25519,rsa "${{ secrets.SERVER_IP || '34.27.174.205' }}" > ~/.ssh/known_hosts 2>/dev/null || true
 
       - name: Run Kamal Prune
         env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          KAMAL_REGISTRY_PASSWORD: ${{ secrets.KAMAL_REGISTRY_PASSWORD }}
           RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          MODERN_RAILS_DATABASE_PASSWORD: ${{ secrets.MODERN_RAILS_DATABASE_PASSWORD }}
+          SERVER_IP: ${{ secrets.SERVER_IP || '34.27.174.205' }}
         run: |
           kamal prune all
