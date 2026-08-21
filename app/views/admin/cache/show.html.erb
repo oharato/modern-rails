@@ -1,0 +1,31 @@
+<div class="max-w-3xl mx-auto space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-black text-white tracking-tight">キャッシュ管理</h1>
+      <p class="text-xs text-slate-400 mt-1">Solid Cache 状態確認 &amp; キャッシュパージ</p>
+    </div>
+  </div>
+
+  <div class="bg-slate-900 rounded-3xl border border-slate-800 p-6 space-y-6">
+    <div class="grid grid-cols-2 gap-4">
+      <div class="p-4 bg-slate-950 rounded-2xl border border-slate-800">
+        <div class="text-xs text-slate-400">Solid Cache エントリ総数</div>
+        <div class="text-2xl font-black text-indigo-400 mt-1"><%= @cache_entries_count %> <span class="text-xs text-slate-500">件</span></div>
+      </div>
+      <div class="p-4 bg-slate-950 rounded-2xl border border-slate-800">
+        <div class="text-xs text-slate-400">トップカタログキャッシュ (60s)</div>
+        <div class="text-base font-bold mt-2 <%= @catalog_top_cached ? 'text-emerald-400' : 'text-slate-500' %>">
+          <%= @catalog_top_cached ? '✓ キャッシュ中' : '未キャッシュ / 期限切れ' %>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-4 bg-amber-950/40 border border-amber-800/80 rounded-2xl space-y-3">
+      <div class="text-xs font-bold text-amber-300">⚡ ワンクリック全キャッシュパージ</div>
+      <p class="text-xs text-amber-200/80">商品情報やカタログのキャッシュを一括で削除し、次回到達時に最新のDBデータを再キャッシュします。</p>
+      <%= button_to admin_purge_cache_path, method: :post, class: "px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-xl text-xs font-black shadow-md cursor-pointer transition" do %>
+        全キャッシュをパージする (Purge Cache)
+      <% end %>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,8 @@
+lamp:
+  category: craft
+  name: 和紙のモダン間接照明
+  slug: washi-ambient-light
+  description: 手漉き和紙の照明
+  price: 8800
+  stock_quantity: 5
+  is_published: true

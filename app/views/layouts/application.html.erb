@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="h-full bg-slate-50 text-slate-900">
   <head>
-    <title><%= content_for(:title) || "Modern Rails 8 Hub" %></title>
+    <title><%= content_for(:title) || "CraftCommerce - モダンクラフトEC" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -16,44 +16,67 @@
 
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <!-- Google Fonts: LINE Seed JP -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LINE+Seed+JP:wght@400;700;800&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700&display=swap">
 
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="min-h-full flex flex-col antialiased">
+  <body class="min-h-full flex flex-col antialiased font-sans bg-slate-50">
     <!-- Header / Nav -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+    <header class="bg-white/95 backdrop-blur border-b border-slate-200 sticky top-0 z-40 transition-all">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16 items-center">
-          <div class="flex items-center space-x-3">
-            <div class="w-9 h-9 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
-              R8
-            </div>
-            <%= link_to root_path, class: "font-semibold text-lg text-slate-800 hover:text-indigo-600 transition" do %>
-              Modern Rails 8 App
+          <!-- Logo & Brand -->
+          <div class="flex items-center space-x-6">
+            <%= link_to root_path, class: "flex items-center space-x-3 group" do %>
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-600 via-orange-500 to-indigo-600 flex items-center justify-center text-white font-black text-xl shadow-md group-hover:scale-105 transition transform">
+                ✨
+              </div>
+              <div>
+                <span class="font-extrabold text-xl text-slate-900 tracking-tight">CraftCommerce</span>
+                <span class="text-[10px] block text-slate-400 font-semibold uppercase tracking-wider -mt-1">Rails 8 Edition</span>
+              </div>
             <% end %>
-            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">
-              Rails 8.0 + SQLite 3 + Hotwire
-            </span>
+
+            <!-- Navigation Links -->
+            <nav class="hidden md:flex items-center space-x-1">
+              <%= link_to "トップ", root_path, class: "px-3 py-2 text-sm font-medium text-slate-700 hover:text-indigo-600 rounded-lg hover:bg-slate-100 transition" %>
+              <%= link_to "商品一覧", products_path, class: "px-3 py-2 text-sm font-medium text-slate-700 hover:text-indigo-600 rounded-lg hover:bg-slate-100 transition" %>
+            </nav>
           </div>
 
-          <div class="flex items-center space-x-4">
-            <%= link_to "📚 学習ガイド", guide_path, class: "text-sm font-semibold text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition" %>
+          <!-- User & Cart Actions -->
+          <div class="flex items-center space-x-3 sm:space-x-4">
+            <!-- Cart Badge -->
+            <%= render "shared/cart_badge" %>
+
             <% if authenticated? %>
-              <div class="text-sm text-slate-600 hidden sm:block">
-                <%= Current.user.email_address %>
+              <%= link_to dashboard_path, class: "text-sm font-medium text-slate-700 hover:text-indigo-600 px-3 py-1.5 rounded-lg hover:bg-slate-100 transition hidden sm:inline-block" do %>
+                ダッシュボード
+              <% end %>
+
+              <%= link_to mypage_orders_path, class: "text-sm font-medium text-slate-700 hover:text-indigo-600 px-3 py-1.5 rounded-lg hover:bg-slate-100 transition hidden sm:inline-block" do %>
+                注文履歴
+              <% end %>
+
+              <% if Current.user&.admin? %>
+                <%= link_to admin_root_path, class: "text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1 rounded-md shadow-sm transition" do %>
+                  Admin
+                <% end %>
+              <% end %>
+
+              <div class="text-xs text-slate-500 hidden lg:block bg-slate-100 px-2.5 py-1 rounded-full">
+                <%= Current.user.name.presence || Current.user.email_address %>
               </div>
-              <%= link_to "ダッシュボード", root_path, class: "text-sm font-medium text-slate-700 hover:text-indigo-600" %>
-              <%= link_to "ジョブ実行テスト", jobs_test_path, class: "text-sm font-medium text-slate-700 hover:text-indigo-600" %>
-              <%= button_to "ログアウト", session_path, method: :delete, class: "text-sm text-red-600 hover:text-red-700 font-medium cursor-pointer" %>
+
+              <%= button_to "ログアウト", session_path, method: :delete, class: "text-xs text-slate-500 hover:text-rose-600 font-medium px-2 py-1 cursor-pointer" %>
             <% else %>
-              <%= link_to "ログイン", new_session_path, class: "text-sm font-medium text-slate-700 hover:text-indigo-600" %>
-              <%= link_to "新規登録", new_registration_path, class: "inline-flex items-center px-3.5 py-1.5 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm" %>
+              <%= link_to "ログイン", login_path, class: "text-sm font-medium text-slate-700 hover:text-indigo-600 px-3 py-1.5" %>
+              <%= link_to "新規登録", signup_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-semibold rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm transition hover:shadow" %>
             <% end %>
           </div>
         </div>
@@ -62,25 +85,24 @@
 
     <!-- Main Content -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <% if notice %>
-        <div class="mb-6 p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-medium flex items-center justify-between">
-          <span><%= notice %></span>
-        </div>
-      <% end %>
-
-      <% if alert %>
-        <div class="mb-6 p-4 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-sm font-medium flex items-center justify-between">
-          <span><%= alert %></span>
-        </div>
-      <% end %>
-
+      <%= render "shared/flash" %>
       <%= yield %>
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-slate-200 mt-auto py-6">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-400">
-        Built with Ruby 4.0, Rails 8, SQLite 3, Solid Queue/Cache/Cable, and Tailwind CSS v4.
+    <footer class="bg-white border-t border-slate-200 mt-auto py-8">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0 text-xs text-slate-500">
+        <div>
+          &copy; <%= Time.current.year %> CraftCommerce. Modern Rails 8 + Solid Trio Benchmark Demo.
+        </div>
+        <div class="flex space-x-4">
+          <%= link_to "トップ", root_path, class: "hover:text-slate-800" %>
+          <%= link_to "商品一覧", products_path, class: "hover:text-slate-800" %>
+          <%= link_to "カート", cart_path, class: "hover:text-slate-800" %>
+          <% if authenticated? && Current.user&.admin? %>
+            <%= link_to "管理者画面", admin_root_path, class: "text-amber-600 hover:text-amber-700 font-semibold" %>
+          <% end %>
+        </div>
       </div>
     </footer>
   </body>

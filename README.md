@@ -1,72 +1,28 @@
-# Modern Rails 8 + Docker Compose + SQLite 3 学習用スターターキット
+# CraftCommerce (Rails 8 + Solid Trio Edition)
 
-最新の **Ruby on Rails 8**、**SQLite 3**、**Docker Compose** を用いたモダンなフルスタックWebアプリケーション環境です。
+**NuxtHub (Nuxt 4 / Cloudflare) vs Modern Rails (Rails 8 / Solid Trio) 比較検証用 統合ECプラットフォーム**
 
-> 📖 **インフラ構築（Pulumi）および本番デプロイ（Kamal 2）の手順は [DEPLOYMENT.md](file:///home/oharato/workspace/modern-rails/DEPLOYMENT.md) にまとめています。**
+最新の **Ruby on Rails 8**、**SQLite 3**、**Solid Trio (Solid Queue, Solid Cache, Solid Cable)**、**Tailwind CSS v4** をフル活用した本格的モダンECアプリケーションです。
+
+> 📖 **詳細設計書**: [docs/craft_commerce_specification.md](file:///home/oharato/workspace/modern-rails/docs/craft_commerce_specification.md)  
+> 📖 **デプロイ手順書 (Kamal 2 & Pulumi)**: [DEPLOYMENT.md](file:///home/oharato/workspace/modern-rails/DEPLOYMENT.md)
 
 ---
 
-## 🚀 採用技術スタック & バージョン
+## 🚀 採用技術スタック & アーキテクチャ
 
-| 技術 | バージョン | 特徴・役割 |
+| 機能コンポーネント | ECサイトでのユースケース | Modern Rails (Rails 8) 実装 |
 | :--- | :--- | :--- |
-| **Ruby** | `4.0` (Slim) | 最新のRuby 4系ランタイム |
-| **Ruby on Rails** | `8.0` | 最新メジャーバージョン（Solid family標準搭載） |
-| **SQLite** | `3.x` | 高速・軽量な組み込みリレーショナルデータベース |
-| **CSS Framework** | **Tailwind CSS v4** | `tailwindcss-rails`（Node.js不要のネイティブビルド） |
-| **JavaScript** | **Importmap + Turbo 8 + Stimulus** | Node.js/npm不要のモダンフロントエンド |
-| **Job Queue** | **Solid Queue** | Redis不要のDB駆動バックグラウンドキュー |
-| **Cache Store** | **Solid Cache** | Redis不要のDB駆動キャッシュ |
-| **WebSocket** | **Solid Cable** | Redis不要のDB駆動Action Cable |
-| **Asset Pipeline** | **Propshaft** | Sprocketsに代わる高速軽量アセットパイプライン |
-| **Deployment** | **Kamal 2** | コンテナベースのゼロダウンタイムデプロイ構成 |
-
----
-
-## 🛠️ プロジェクト作成時に実行したコマンド一覧
-
-以下は、このプロジェクトをゼロから構築する際に実行した一連のコマンド履歴です。
-
-### 1. 初期設定 & Dockerビルド
-```bash
-# Dockerfile.dev と compose.yaml を用意した後、イメージをビルド
-docker compose build web
-```
-
-### 2. Rails 8 アプリケーションの新規生成
-```bash
-# 最新のRails 8プロジェクトをSQLite & Tailwind CSS構成で初期化
-docker compose run --rm --no-deps web bundle exec rails new . \
-  --name=modern_rails \
-  --force \
-  --database=sqlite3 \
-  --css=tailwind
-```
-
-### 3. データベース & 認証機能の導入 (Rails 8 新機能)
-```bash
-# DB接続設定(database.yml)調整後にデータベース作成
-docker compose run --rm web bin/rails db:create
-
-# Rails 8 組み込み認証ジェネレータの実行 (Devise等を使わない標準認証)
-docker compose run --rm web bin/rails generate authentication
-
-# プロジェクト & タスク管理モデルの作成
-docker compose run --rm web bin/rails generate model Project title:string description:text user:references color:string
-docker compose run --rm web bin/rails generate model Task title:string completed:boolean due_date:date priority:integer project:references user:references
-
-# マイグレーションの実行
-docker compose run --rm web bin/rails db:migrate
-```
-
-### 4. 初期シードデータの投入 & Tailwindビルド
-```bash
-# デモユーザーとサンプルタスクの投入
-docker compose run --rm web bin/rails db:seed
-
-# Tailwind CSSのビルド
-docker compose run --rm web bin/rails tailwindcss:build
-```
+| **商品カタログ / SSR** | SEO & 超高速レンダリング | Hotwire (Turbo Drive + Morphing) |
+| **商品データ & 注文** | ユーザー、商品、在庫、注文トランザクション | SQLite 3 + ActiveRecord (排他ロック `lock!`) |
+| **カート & 閲覧履歴** | ゲスト/会員の高速カート保持、自動マージ | `Solid Cache` (Key-Value Store) |
+| **画像 & 領収書PDF** | ギャラリー画像、購入後のPDF領収書保管 | Active Storage + `prawn` gem |
+| **非同期処理** | 注文確認メール、PDF生成、日次集計バッチ | `Solid Queue` + Active Job (`JobLog` 記録) |
+| **カタログキャッシュ** | トップ・商品一覧の60秒キャッシュ配信 | `Solid Cache` (`Rails.cache.fetch`) |
+| **在庫ライブ同期** | 残り在庫数のリアルタイム更新、管理者注文速報 | `Solid Cable` + Turbo Streams |
+| **認証 & 権限** | 一般顧客アカウント & 管理者 (Admin) ダッシュボード | Rails 8 組み込み認証 + Role制御 |
+| **DB管理・運用** | 在庫確認、クエリチューニング、データ保守 | Harlequin TUI (`.harlequin.toml`) |
+| **デプロイ・インフラ** | 本番稼働構成 | Kamal 2 + Pulumi (GCP) |
 
 ---
 
@@ -76,139 +32,79 @@ docker compose run --rm web bin/rails tailwindcss:build
 ```bash
 docker compose up
 ```
-バックグラウンドで起動する場合:
+バックグラウンド起動:
 ```bash
 docker compose up -d
 ```
 
 ### 2. ブラウザでアクセス
-- URL: **`http://localhost:3000`** または **`http://nuc7.local:3000`**
-*(開発環境 `development.rb` にて `config.hosts.clear` を設定済みのため、ローカルネットワーク内のホスト名やIPアドレスからアクセス可能です)*
+- 顧客向けフロント: **`http://localhost:3000`**
+- 管理者ダッシュボード: **`http://localhost:3000/admin`**
+- 学習・アーキテクチャガイド: **`http://localhost:3000/guide`**
 
-### 3. 初期ログインアカウント
-`db/seeds.rb` により以下のデモユーザーが登録されています：
-- **メールアドレス**: `demo@example.com`
-- **パスワード**: `password123`
-*(画面右上の「新規登録」から新しいアカウントを作成することも可能です)*
+### 3. 初期検証アカウント
+`db/seeds.rb` により以下のテストアカウントが作成されています：
+
+| 権限 | Email | Password | 役割 |
+| :--- | :--- | :--- | :--- |
+| **管理者 (Admin)** | `admin@example.com` | `password123` | 管理画面 (`/admin`)、在庫編集、ジョブ・キャッシュ管理 |
+| **一般会員 (Customer)** | `user@example.com` | `password123` | 商品購入、カート、注文履歴、領収書PDFダウンロード、レビュー投稿 |
+
+*(※ ログイン画面にお試しワンクリックログインボタンを用意しています)*
 
 ---
 
-## 🌟 Rails 8 モダンスタックの学習ポイント
+## 🌟 実装されたコア機能
 
-### 1. 組み込み認証 (`rails generate authentication`)
-- Rails 8 からフレームワーク本体に認証ジェネレータが追加されました。
-- `User`, `Session`, `Current` モデルと `Authentication` concern が自動生成され、Cookieセッションによる堅牢な認証が標準で動作します。
+### 1. 高速な商品カタログ & キャッシュ (Solid Cache)
+- トップページ (`/`)、商品一覧 (`/products`) は 60秒キャッシュ。
+- 管理者による商品情報・在庫編集時、および管理画面 (`/admin/cache`) からのワンクリックパージで即座にキャッシュ破棄。
 
-### 2. Solid Trio (Redis不要のモダンアーキテクチャ)
-- **Solid Queue**: SQLiteのテーブルを活用した非同期ジョブ実行。本アプリの「ジョブ実行テスト」画面（`/jobs/test`）で確認できます。
-- **Solid Cache**: DB内にキャッシュを保持する仕組み。ダッシュボードの統計情報が `Rails.cache.fetch` で高速キャッシュされています。
-- **Solid Cable**: RedisなしでAction Cable/Turbo Streamsのリアルタイム通信を実現。
+### 2. ショッピングカート & 閲覧履歴 (KV Store)
+- **ゲスト**: Cookie `guest_session_id` (UUID) に紐づく `cart:guest_<uuid>` (TTL: 7日) で高速読み書き。
+- **会員**: `cart:user_<id>` (TTL: 30日) で保持。
+- **自動マージ**: ゲスト状態で商品をカートに入れたままログイン/新規登録すると、会員カートへ自動統合しゲストカートKVを削除。
+- **閲覧履歴**: `recently_viewed:guest_<uuid>` / `recently_viewed:user_<id>` に直近6件を記録し画面下部に表示。
 
-### 3. Hotwire (Turbo Streams + Morphing)
-- タスクの追加・完了切り替え・削除やプロジェクト作成が、**ページリロードなし（Turbo Streams）** で即座にDOM更新されます。
-- `broadcasts_refreshes` による自動同期にも対応しています。
+### 3. トランザクション & 排他制御 (モック決済)
+- チェックアウト時に `Product.lock` による排他ロックで在庫を安全に引き当て。
+- 在庫不足時はロールバックし二重購入・在庫マイナスを防止。
 
-### 4. Tailwind CSS v4 + Importmap (Node.jsフリー)
-- Node.jsやWebpack/Viteを介さず、StandaloneなTailwind CLIとブラウザ標準のES Modules (Importmap) で高速に動作します。
+### 4. 非同期ジョブ & 領収書PDF (Solid Queue + Prawn)
+- 注文完了時に `OrderConfirmationMailJob` と `ReceiptGenerationJob` を非同期投入。
+- Prawn により PDF 領収書をバイナリ生成し、Active Storage に添付・保存。
+- ユーザーはマイページ (`/mypage/orders`) から領収書PDFをストリーミングダウンロード可能。
+- ジョブ実行状況は `JobLog` テーブルに記録され、`/admin/jobs` で監視可能。
+
+### 5. リアルタイム在庫 & 管理者速報 (Solid Cable / Turbo Streams)
+- 商品詳細画面: 他ユーザーが購入すると在庫バッジ（「残りわずか」「在庫切れ」等）がリロードなしで即時更新。
+- 管理者ダッシュボード: 新規注文が入るとリアルタイムにトースト通知が表示され、直近注文テーブルの先頭に行が追加され、売上サマリーカウンターが自動インクリメント。
+
+### 6. REST / JSON API (仕様書 Section 6 準拠)
+- `/api/auth/register`, `/api/auth/login`, `/api/auth/logout`, `/api/auth/me`
+- `/api/products`, `/api/products/:slug`, `/api/categories`
+- `/api/products/:slug/reviews`
+- `/api/cart`, `/api/cart/items`, `/api/cart/items/:id`, `/api/user/recently-viewed`
+- `/api/orders`, `/api/orders/my`, `/api/orders/:id/receipt`
+- `/api/admin/products`, `/api/admin/orders`, `/api/admin/jobs/daily-report`, `/api/admin/cache/purge`
 
 ---
 
 ## 📋 よく使う開発コマンド集
 
-| 操作 | コマンド |
-| :--- | :--- |
-| **コンテナ起動** | `docker compose up` |
-| **コンテナ停止** | `docker compose down` |
-| **Railsコンソール** | `docker compose run --rm web bin/rails console` |
-| **DBマイグレーション** | `docker compose run --rm web bin/rails db:migrate` |
-| **DBリセット & シード** | `docker compose run --rm web bin/rails db:reset` |
-| **Tailwindビルド** | `docker compose run --rm web bin/rails tailwindcss:build` |
-| **テスト実行** | `docker compose run --rm web bin/rails test` |
-
----
-
-## ⚡ LSP (Language Server) の設定 (Fresh Editor / VSCode / Neovim)
-
-本プロジェクトには、Shopify製の最新公式LSP **`ruby-lsp`** および Rails 拡張 **`ruby-lsp-rails`** が導入されています。
-
-### 導入済みファイル
-- `Gemfile`: `ruby-lsp`, `ruby-lsp-rails`
-- `bin/docker-ruby-lsp`: Dockerコンテナ経由でLSPを起動する実行可能ラッパースクリプト
-
-### Fresh Editor / エディタでの設定方法
-
-#### 方法 A: Dockerコンテナ経由でLSPを使う場合（推奨）
-ホスト側にRuby環境がなくても、用意された `bin/docker-ruby-lsp` をエディタのLSPコマンドに指定するだけで利用できます。
-
-**Fresh Editor の設定 (`~/.config/fresh/config.json`):**
-```json
-{
-  "lsp": {
-    "ruby": [
-      {
-        "command": "bin/docker-ruby-lsp",
-        "enabled": true,
-        "auto_start": true,
-        "args": [],
-        "root_markers": [
-          "Gemfile",
-          ".ruby-version",
-          ".git"
-        ]
-      }
-    ]
-  }
-}
-```
-*(※ すでに `~/.config/fresh/config.json` に設定済みですので、そのまま `fresh` コマンドでファイルを開けば利用可能です)*
-
-### LSPで利用できる機能
-- **定義元ジャンプ (Go to Definition)**: モデル、コントローラー、ヘルパー、ActiveRecordメソッド等
-- **Rails固有のナビゲーション**: ルート定義からアクションへのジャンプ、アソシエーションの解決
-- **コード補完 & ホバー情報**: 型やドキュメントの即時表示
-- **自動フォーマット & リント**: RuboCop とのシームレスな統合
-
----
-
-## 🔍 データベース管理 (Harlequin TUI)
-
-ターミナルベースの高速SQL IDE **[Harlequin](https://harlequin.sh/)** を使って、開発環境およびテスト環境のSQLiteデータベースを閲覧・操作できます。
-
-プロジェクトルートに [`.harlequin.toml`](file:///home/oharato/workspace/modern-rails/.harlequin.toml) が配置されているため、追加オプション不要で接続可能です。
-
-### 1. インストール (未導入の場合)
 ```bash
-uv tool install "harlequin[sqlite]"
-# または
-uv tool install harlequin
-```
+# テストの実行 (全30テスト・117アサーション)
+docker compose run --rm web bin/rails test
 
-### 2. 起動方法
+# DBシードの再投入
+docker compose run --rm web bin/rails db:seed
 
-```bash
-# 開発環境 DB (storage/development.sqlite3) に接続
+# Tailwind CSSのビルド
+docker compose run --rm web bin/rails tailwindcss:build
+
+# Railsコンソール
+docker compose run --rm web bin/rails console
+
+# Harlequin TUI でSQLiteを操作
 harlequin
-
-# テスト環境 DB (storage/test.sqlite3) に接続
-harlequin -P test
 ```
-
-### 3. CLIワンライナー実行 (`hsql`)
-TUIを開かずにターミナル上で直接クエリ結果を出力することも可能です。
-```bash
-# 開発DBでクエリ実行
-hsql -c "SELECT count(*) FROM users;"
-
-# テストDBでクエリ実行
-hsql -P test -c "SELECT count(*) FROM users;"
-```
-
-### 4. 主な操作キー
-| キー | 動作 |
-| :--- | :--- |
-| **`Ctrl + J`** / **`F5`** | カーソル位置のSQL / 選択範囲のSQLを実行 |
-| **`F6`** | データカタログ（テーブル一覧・スキーマ）にフォーカス切替 |
-| **`F7`** | クエリ結果ビューにフォーカス切替 |
-| **`Ctrl + K`** | クエリフォーマッタ実行 |
-| **`Ctrl + C`** / **`Ctrl + Q`** | Harlequin の終了 |
-

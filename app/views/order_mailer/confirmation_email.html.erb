@@ -1,0 +1,20 @@
+<h2><%= @user.name.presence || @user.email_address %> 様</h2>
+<p>CraftCommerce をご利用いただき、誠にありがとうございます。</p>
+<p>以下の内容でご注文を承りました。</p>
+
+<hr>
+<p><strong>注文番号:</strong> <%= @order.order_number %></p>
+<p><strong>注文日時:</strong> <%= @order.created_at.strftime("%Y年%m月%d日 %H:%M") %></p>
+<p><strong>決済ステータス:</strong> <%= @order.status.capitalize %></p>
+
+<h3>ご注文明細</h3>
+<ul>
+  <% @order.order_items.includes(:product).each do |item| %>
+    <li><%= item.product.name %> - <%= number_to_currency(item.price_at_purchase, unit: "¥", precision: 0) %> × <%= item.quantity %> = <%= number_to_currency(item.subtotal, unit: "¥", precision: 0) %></li>
+  <% end %>
+</ul>
+
+<h3><strong>合計金額: <%= number_to_currency(@order.total_amount, unit: "¥", precision: 0) %></strong></h3>
+<hr>
+
+<p>マイページより領収書PDFをダウンロードいただけます。</p>

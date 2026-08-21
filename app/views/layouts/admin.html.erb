@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html class="h-full bg-slate-900 text-slate-100">
+  <head>
+    <title><%= content_for(:title) || "CraftCommerce Admin" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <meta name="turbo-refresh-method" content="morph">
+    <meta name="turbo-refresh-scroll" content="preserve">
+
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="min-h-full flex flex-col antialiased bg-slate-950 text-slate-100">
+    <!-- Admin Header -->
+    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16 items-center">
+          <div class="flex items-center space-x-6">
+            <%= link_to admin_root_path, class: "flex items-center space-x-3" do %>
+              <div class="w-9 h-9 rounded-xl bg-amber-500 flex items-center justify-center text-slate-950 font-black text-lg">
+                ⚡
+              </div>
+              <span class="font-bold text-lg text-white tracking-tight">CraftCommerce <span class="text-amber-400 text-xs font-mono uppercase bg-amber-950/80 px-2 py-0.5 rounded border border-amber-800">Admin</span></span>
+            <% end %>
+
+            <nav class="hidden md:flex items-center space-x-1">
+              <%= link_to "ダッシュボード", admin_root_path, class: "px-3 py-2 text-sm font-medium text-slate-300 hover:text-white rounded-lg hover:bg-slate-800 transition" %>
+              <%= link_to "商品管理", admin_products_path, class: "px-3 py-2 text-sm font-medium text-slate-300 hover:text-white rounded-lg hover:bg-slate-800 transition" %>
+              <%= link_to "注文管理", admin_orders_path, class: "px-3 py-2 text-sm font-medium text-slate-300 hover:text-white rounded-lg hover:bg-slate-800 transition" %>
+              <%= link_to "ジョブ監視", admin_jobs_path, class: "px-3 py-2 text-sm font-medium text-slate-300 hover:text-white rounded-lg hover:bg-slate-800 transition" %>
+              <%= link_to "キャッシュ管理", admin_cache_management_path, class: "px-3 py-2 text-sm font-medium text-slate-300 hover:text-white rounded-lg hover:bg-slate-800 transition" %>
+            </nav>
+          </div>
+
+          <div class="flex items-center space-x-4">
+            <%= link_to "🛒 ショップへ戻る", root_path, class: "text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 transition" %>
+            <%= button_to "ログアウト", session_path, method: :delete, class: "text-xs text-rose-400 hover:text-rose-300 font-medium cursor-pointer" %>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Toast Notification Container for Realtime Events -->
+    <div id="toast_container" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+    <!-- Admin Main -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <% if notice %>
+        <div class="mb-6 p-4 rounded-xl bg-emerald-950/80 border border-emerald-800 text-emerald-200 text-sm font-medium">
+          <%= notice %>
+        </div>
+      <% end %>
+      <% if alert %>
+        <div class="mb-6 p-4 rounded-xl bg-rose-950/80 border border-rose-800 text-rose-200 text-sm font-medium">
+          <%= alert %>
+        </div>
+      <% end %>
+
+      <%= yield %>
+    </main>
+
+    <!-- Admin Footer -->
+    <footer class="bg-slate-900 border-t border-slate-800 mt-auto py-6">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-500">
+        CraftCommerce Admin Backoffice &middot; Rails 8 + Solid Queue &amp; Solid Cable
+      </div>
+    </footer>
+  </body>
+</html>

@@ -16,12 +16,9 @@ module ModernRails
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks])
 
-    # Configuration for the application, engines, and railties goes here.
-    #
-    # These settings can be overridden in specific environments using the files
-    # in config/environments, which are processed later.
-    #
-    # config.time_zone = "Central Time (US & Canada)"
-    # config.eager_load_paths << Rails.root.join("extras")
+    # Active Storage proxy routes and inline svg
+    config.active_storage.resolve_model_to_route = :rails_storage_proxy
+    config.active_storage.content_types_to_serve_as_binary -= ["image/svg+xml"]
+    config.active_storage.content_types_allowed_inline << "image/svg+xml"
   end
 end

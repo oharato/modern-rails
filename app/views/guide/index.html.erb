@@ -1,212 +1,130 @@
-<div class="max-w-5xl mx-auto space-y-10 pb-16">
-  <!-- Hero Section -->
-  <div class="bg-gradient-to-r from-indigo-900 via-slate-900 to-indigo-950 text-white rounded-3xl p-8 sm:p-10 shadow-xl relative overflow-hidden">
-    <div class="relative z-10 max-w-3xl">
-      <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/30 text-indigo-200 border border-indigo-400/30 mb-4">
-        Rails 8 Architecture Deep Dive
-      </span>
-      <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">
-        最新 Rails 8 スタック & Hotwire 非同期設計ガイド
-      </h1>
-      <p class="mt-4 text-slate-300 text-base sm:text-lg leading-relaxed">
-        Node.js 不要、Redis 不要、外部認証 Gem 不要。<br class="hidden sm:inline">
-        最小限のインフラ構成で最大の開発生産性と高速性を誇る、最新の Rails 8 設計思想を徹底解説します。
+<div class="max-w-4xl mx-auto space-y-12 py-4">
+  <!-- Hero -->
+  <div class="text-center space-y-4">
+    <span class="px-3.5 py-1.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">
+      Architecture Deep Dive
+    </span>
+    <h1 class="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
+      Modern Rails 8 vs NuxtHub<br>
+      <span class="bg-gradient-to-r from-indigo-600 to-amber-600 bg-clip-text text-transparent">「CraftCommerce」設計・比較検証</span>
+    </h1>
+    <p class="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto leading-relaxed">
+      画像配信、高速キャッシュ、KVカート、トランザクション、非同期ジョブ、リアルタイム在庫同期など、
+      Web開発におけるあらゆる技術要素が詰まったECプラットフォームの実装ガイド。
+    </p>
+  </div>
+
+  <!-- Tech Stack Mapping Table -->
+  <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm space-y-4 p-6 sm:p-8">
+    <h2 class="text-xl font-extrabold text-slate-900 border-b border-slate-100 pb-3">技術スタック対照表</h2>
+    <div class="overflow-x-auto">
+      <table class="w-full text-xs text-left">
+        <thead class="bg-slate-50 font-bold text-slate-700 uppercase">
+          <tr>
+            <th class="py-3 px-4 rounded-l-xl">機能コンポーネント</th>
+            <th class="py-3 px-4">ECユースケース</th>
+            <th class="py-3 px-4 bg-indigo-50/50 text-indigo-900 font-black">Modern Rails (Rails 8)</th>
+            <th class="py-3 px-4 bg-emerald-50/50 text-emerald-900 font-black rounded-r-xl">NuxtHub (Nuxt 4 + CF)</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <tr>
+            <td class="py-3 px-4 font-bold text-slate-900">カタログ / SSR</td>
+            <td class="py-3 px-4 text-slate-600">SEO & 高速レンダリング</td>
+            <td class="py-3 px-4 font-semibold text-indigo-700">Hotwire (Turbo + Morphing)</td>
+            <td class="py-3 px-4 font-semibold text-emerald-700">Vue 3 + Nuxt 4 SSR</td>
+          </tr>
+          <tr>
+            <td class="py-3 px-4 font-bold text-slate-900">データ & 注文</td>
+            <td class="py-3 px-4 text-slate-600">ユーザー、在庫、トランザクション</td>
+            <td class="py-3 px-4 font-semibold text-indigo-700">SQLite3 + ActiveRecord</td>
+            <td class="py-3 px-4 font-semibold text-emerald-700">Cloudflare D1 + Drizzle ORM</td>
+          </tr>
+          <tr>
+            <td class="py-3 px-4 font-bold text-slate-900">カート & 閲覧履歴</td>
+            <td class="py-3 px-4 text-slate-600">高速一時保持、自動マージ</td>
+            <td class="py-3 px-4 font-semibold text-indigo-700">Solid Cache (KV Store)</td>
+            <td class="py-3 px-4 font-semibold text-emerald-700">Cloudflare KV (hubKV)</td>
+          </tr>
+          <tr>
+            <td class="py-3 px-4 font-bold text-slate-900">画像 & 領収書PDF</td>
+            <td class="py-3 px-4 text-slate-600">ギャラリー画像、PDF帳票保管</td>
+            <td class="py-3 px-4 font-semibold text-indigo-700">Active Storage + Prawn</td>
+            <td class="py-3 px-4 font-semibold text-emerald-700">Cloudflare R2 + pdf-lib</td>
+          </tr>
+          <tr>
+            <td class="py-3 px-4 font-bold text-slate-900">非同期処理</td>
+            <td class="py-3 px-4 text-slate-600">注文完了メール、PDF生成、集計バッチ</td>
+            <td class="py-3 px-4 font-semibold text-indigo-700">Solid Queue + Active Job</td>
+            <td class="py-3 px-4 font-semibold text-emerald-700">Cloudflare Queues / Nitro Tasks</td>
+          </tr>
+          <tr>
+            <td class="py-3 px-4 font-bold text-slate-900">カタログキャッシュ</td>
+            <td class="py-3 px-4 text-slate-600">トップ・一覧の60sキャッシュ</td>
+            <td class="py-3 px-4 font-semibold text-indigo-700">Solid Cache (Rails.cache)</td>
+            <td class="py-3 px-4 font-semibold text-emerald-700">Nitro Cache (defineCachedEventHandler)</td>
+          </tr>
+          <tr>
+            <td class="py-3 px-4 font-bold text-slate-900">在庫ライブ同期</td>
+            <td class="py-3 px-4 text-slate-600">残り在庫数のリアルタイム更新</td>
+            <td class="py-3 px-4 font-semibold text-indigo-700">Solid Cable + Turbo Streams</td>
+            <td class="py-3 px-4 font-semibold text-emerald-700">Server-Sent Events (SSE)</td>
+          </tr>
+          <tr>
+            <td class="py-3 px-4 font-bold text-slate-900">認証 & 権限</td>
+            <td class="py-3 px-4 text-slate-600">顧客アカウント & Admin</td>
+            <td class="py-3 px-4 font-semibold text-indigo-700">Rails 8 組み込み認証 + Role</td>
+            <td class="py-3 px-4 font-semibold text-emerald-700">暗号化 Cookie (h3 sealSession)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Key Architecture Features -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="bg-white p-6 rounded-3xl border border-slate-200 space-y-3">
+      <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl font-bold">
+        ⚡
+      </div>
+      <h3 class="font-bold text-base text-slate-900">Solid Cache による一時カート & KV</h3>
+      <p class="text-xs text-slate-600 leading-relaxed">
+        未ログイン（ゲスト）時は Cookie の UUID に紐づく <code>cart:guest_&lt;uuid&gt;</code>（TTL: 7日）、ログイン時は <code>cart:user_&lt;id&gt;</code>（TTL: 30日）として Solid Cache の Key-Value ストアで超高速に読み書きします。ログイン時に自動で統合（マージ）されます。
+      </p>
+    </div>
+
+    <div class="bg-white p-6 rounded-3xl border border-slate-200 space-y-3">
+      <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl font-bold">
+        🔒
+      </div>
+      <h3 class="font-bold text-base text-slate-900">排他ロックとトランザクション整合性</h3>
+      <p class="text-xs text-slate-600 leading-relaxed">
+        チェックアウト時には <code>Product.lock</code> による悲観的排他ロックとデータベーストランザクションを用いて、在庫数を安全に引き当てます。在庫不足時はロールバックし二重購入を防止します。
+      </p>
+    </div>
+
+    <div class="bg-white p-6 rounded-3xl border border-slate-200 space-y-3">
+      <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl font-bold">
+        📡
+      </div>
+      <h3 class="font-bold text-base text-slate-900">Solid Cable リアルタイム同期</h3>
+      <p class="text-xs text-slate-600 leading-relaxed">
+        Redis などの外部サーバー不要で、SQLite バックエンドの Solid Cable を通じて WebSocket 配信。商品詳細画面を開いている他ユーザーの在庫バッジを即座に更新し、管理者画面へ注文速報トーストを通知します。
+      </p>
+    </div>
+
+    <div class="bg-white p-6 rounded-3xl border border-slate-200 space-y-3">
+      <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl font-bold">
+        📄
+      </div>
+      <h3 class="font-bold text-base text-slate-900">Solid Queue 非同期PDF・メール処理</h3>
+      <p class="text-xs text-slate-600 leading-relaxed">
+        注文確定後、Prawn による領収書PDF生成ジョブと注文確認メール送信ジョブが非同期で実行され、生成された PDF は Active Storage に永続化されます。ジョブの実行状況は <code>JobLog</code> テーブルに記録されます。
       </p>
     </div>
   </div>
 
-  <!-- Table of Contents Quick Nav -->
-  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-    <a href="#hotwire" class="p-4 bg-white rounded-xl border border-slate-200 hover:border-indigo-500 hover:shadow-md transition group text-center">
-      <div class="text-2xl mb-1">⚡️</div>
-      <div class="text-xs font-bold text-slate-800 group-hover:text-indigo-600">Hotwire 非同期処理</div>
-    </a>
-    <a href="#solid" class="p-4 bg-white rounded-xl border border-slate-200 hover:border-indigo-500 hover:shadow-md transition group text-center">
-      <div class="text-2xl mb-1">📦</div>
-      <div class="text-xs font-bold text-slate-800 group-hover:text-indigo-600">Solid Trio (DB完結)</div>
-    </a>
-    <a href="#auth" class="p-4 bg-white rounded-xl border border-slate-200 hover:border-indigo-500 hover:shadow-md transition group text-center">
-      <div class="text-2xl mb-1">🔐</div>
-      <div class="text-xs font-bold text-slate-800 group-hover:text-indigo-600">Rails 8 組み込み認証</div>
-    </a>
-    <a href="#frontend" class="p-4 bg-white rounded-xl border border-slate-200 hover:border-indigo-500 hover:shadow-md transition group text-center">
-      <div class="text-2xl mb-1">🎨</div>
-      <div class="text-xs font-bold text-slate-800 group-hover:text-indigo-600">No-Build フロントエンド</div>
-    </a>
-  </div>
-
-  <!-- Section 1: Hotwire & Async UI -->
-  <section id="hotwire" class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
-    <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
-      <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-lg">
-        01
-      </div>
-      <div>
-        <h2 class="text-2xl font-bold text-slate-800">Hotwire による非同期画面更新</h2>
-        <p class="text-sm text-slate-500">JavaScript 0行でSPA同等のインタラクティブ性を実現する2大手法</p>
-      </div>
-    </div>
-
-    <div class="prose prose-slate max-w-none text-slate-600 text-sm leading-relaxed space-y-4">
-      <p>
-        従来の React や Vue では、バックエンドに JSON API を作り、フロントで <code>fetch</code> や <code>useState</code> を書いてクライアント側で HTML を組み立てる必要がありました。<br>
-        Rails 8 の <strong>Hotwire (HTML Over The Wire)</strong> は、<strong>サーバーが生成した HTML 片（またはページ全体）を直接ブラウザに送り、ブラウザ側がスマートに差し替える</strong> アプローチを取ります。
-      </p>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <!-- Turbo Streams -->
-      <div class="p-5 rounded-xl border border-indigo-100 bg-indigo-50/40 space-y-3">
-        <div class="flex items-center justify-between">
-          <span class="font-bold text-indigo-900 text-base">手法 A: Turbo Streams（ピンポイント更新）</span>
-          <span class="text-[10px] uppercase font-bold px-2 py-0.5 bg-indigo-200 text-indigo-800 rounded">本アプリで採用</span>
-        </div>
-        <p class="text-xs text-slate-600">
-          追加・削除・変更があった要素「だけ」をピンポイントで DOM に差し込みます（<code>prepend</code>, <code>append</code>, <code>replace</code>, <code>remove</code>）。
-        </p>
-        <div class="bg-slate-900 text-slate-200 p-3 rounded-lg text-xs font-mono">
-          <div class="text-slate-400 text-[10px] mb-1"># app/views/projects/create.turbo_stream.erb</div>
-          &lt;%= turbo_stream.prepend "projects_list", @project %&gt;<br>
-          &lt;%= turbo_stream.replace "new_project_form", partial: "form" %&gt;
-        </div>
-        <div class="text-xs text-indigo-700">
-          💡 <strong>ポイント:</strong> リストの先頭に即座に追加され、フォームだけがリセットされます。
-        </div>
-      </div>
-
-      <!-- Turbo 8 Morphing -->
-      <div class="p-5 rounded-xl border border-emerald-100 bg-emerald-50/40 space-y-3">
-        <div class="flex items-center justify-between">
-          <span class="font-bold text-emerald-900 text-base">手法 B: Turbo 8 Morphing（自動差分マージ）</span>
-          <span class="text-[10px] uppercase font-bold px-2 py-0.5 bg-emerald-200 text-emerald-800 rounded">Rails 8 新機能</span>
-        </div>
-        <p class="text-xs text-slate-600">
-          コントローラーは通常の <code>redirect_to</code> を行うだけ。Turbo 8 がIdiomorphエンジンで画面全体の差分を自動検出し、スクロール位置を保ったまま差分マージします。
-        </p>
-        <div class="bg-slate-900 text-slate-200 p-3 rounded-lg text-xs font-mono">
-          <div class="text-slate-400 text-[10px] mb-1"># app/controllers/projects_controller.rb</div>
-          def create<br>
-          &nbsp;&nbsp;@project = Current.user.projects.create!(project_params)<br>
-          &nbsp;&nbsp;redirect_to root_path # 自動で差分更新される！<br>
-          end
-        </div>
-        <div class="text-xs text-emerald-700">
-          💡 <strong>ポイント:</strong> Turbo Stream ファイルすら不要で、従来のRails標準リダイレクトのまま非同期になります。
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Section 2: Solid Trio -->
-  <section id="solid" class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
-    <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
-      <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-lg">
-        02
-      </div>
-      <div>
-        <h2 class="text-2xl font-bold text-slate-800">Solid Trio：Redis 不要の DB 駆動アーキテクチャ</h2>
-        <p class="text-sm text-slate-500">SQLite だけでキュー・キャッシュ・WebSocket を完結</p>
-      </div>
-    </div>
-
-    <p class="text-sm text-slate-600 leading-relaxed">
-      Rails 7 までは、非同期ジョブ（Sidekiq）やキャッシュ、Action Cable に Redis サーバーがほぼ必須でした。<br>
-      Rails 8 では、3つの <strong>Solid ファミリー</strong> が標準搭載され、単一のデータベース（SQLite）のみで全機能がトランザクション安全に動作します。
-    </p>
-
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
-        <div class="font-bold text-slate-800 flex items-center gap-1.5">
-          <span class="text-indigo-600">●</span> Solid Queue
-        </div>
-        <p class="text-xs text-slate-600">
-          ActiveJob の公式バックエンド。ジョブの遅延実行、リトライ、定期実行（Cron代替）を DB テーブル上で安全に管理。
-        </p>
-      </div>
-
-      <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
-        <div class="font-bold text-slate-800 flex items-center gap-1.5">
-          <span class="text-purple-600">●</span> Solid Cache
-        </div>
-        <p class="text-xs text-slate-600">
-          巨大なメモリ（Redis）を使わず、DB の SSD ストレージを活用して GB 単位のキャッシュを低コストに高速保持。
-        </p>
-      </div>
-
-      <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
-        <div class="font-bold text-slate-800 flex items-center gap-1.5">
-          <span class="text-emerald-600">●</span> Solid Cable
-        </div>
-        <p class="text-xs text-slate-600">
-          WebSocket / Action Cable の Pub/Sub メッセージングを DB のポーリング/通知で実現。
-        </p>
-      </div>
-    </div>
-
-    <div class="pt-2">
-      <%= link_to solid_trio_guide_path, class: "inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold shadow-sm transition" do %>
-        <span>Solid Trio（Queue / Cache / Cable）の超詳細解説ページを見る</span>
-        <span>→</span>
-      <% end %>
-    </div>
-  </section>
-
-  <!-- Section 3: Built-in Authentication -->
-  <section id="auth" class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
-    <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
-      <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-lg">
-        03
-      </div>
-      <div>
-        <h2 class="text-2xl font-bold text-slate-800">Rails 8 組み込み認証（`rails g authentication`）</h2>
-        <p class="text-sm text-slate-500">Devise を使わず、フレームワーク標準の軽量・セキュアな認証基盤</p>
-      </div>
-    </div>
-
-    <p class="text-sm text-slate-600 leading-relaxed">
-      長年定番だった Devise は多機能な反面、ブラックボックス化しやすい課題がありました。Rails 8 では <code>rails generate authentication</code> コマンドにより、アプリ内に直接理解しやすいコードが生成されます。
-    </p>
-
-    <div class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs font-mono overflow-x-auto space-y-2">
-      <div class="text-slate-400"># 生成される主要ファイルと役割</div>
-      <div><span class="text-indigo-400">app/models/user.rb</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ has_secure_password / email 正規化</div>
-      <div><span class="text-indigo-400">app/models/session.rb</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ 端末・IPアドレス・ユーザーエージェントを記録するセッションモデル</div>
-      <div><span class="text-indigo-400">app/models/current.rb</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ Current.user / Current.session のスレッドセーフなグローバル参照</div>
-      <div><span class="text-indigo-400">app/controllers/concerns/auth.rb</span>&nbsp;&nbsp;→ require_authentication / start_new_session_for などの認証基盤</div>
-    </div>
-  </section>
-
-  <!-- Section 4: Frontend & Tooling -->
-  <section id="frontend" class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
-    <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
-      <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-lg">
-        04
-      </div>
-      <div>
-        <h2 class="text-2xl font-bold text-slate-800">No-Build フロントエンド & 最新開発環境</h2>
-        <p class="text-sm text-slate-500">Node.js 不要の Tailwind CSS v4 ＋ Shopify 公式 ruby-lsp</p>
-      </div>
-    </div>
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-      <div class="p-5 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
-        <h3 class="font-bold text-slate-800 text-sm">Tailwind CSS v4 + Propshaft</h3>
-        <p class="text-xs text-slate-600 leading-relaxed">
-          <code>tailwindcss-rails</code> により、Rust 製の高速スタンドアロンバイナリが直接 CSS をコンパイル。<code>node_modules</code> や Webpack の複雑な設定が一切不要です。
-        </p>
-      </div>
-
-      <div class="p-5 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
-        <h3 class="font-bold text-slate-800 text-sm">Shopify ruby-lsp (公式デファクト)</h3>
-        <p class="text-xs text-slate-600 leading-relaxed">
-          Ruby 公式パーサー（Prism）を内蔵した超高速 LSP。<code>ruby-lsp-rails</code> と連携することで、ActiveRecord モデルやルート定義へのジャンプが完璧に機能します。
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Return Link -->
   <div class="text-center pt-4">
-    <%= link_to "← ダッシュボードに戻って実際に操作してみる", root_path, class: "inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold shadow-md transition" %>
+    <%= link_to "&larr; ショップへ戻る".html_safe, root_path, class: "inline-flex items-center px-6 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md transition" %>
   </div>
 </div>

@@ -1,0 +1,176 @@
+<% content_for :title, "#{@product.name} - CraftCommerce" %>
+
+<!-- Subscribe to Realtime Inventory Updates via Solid Cable -->
+<%= turbo_stream_from "product_inventory_#{@product.id}" %>
+
+<div class="space-y-12">
+  <!-- Breadcrumb -->
+  <nav class="flex items-center space-x-2 text-xs text-slate-500">
+    <%= link_to "トップ", root_path, class: "hover:text-slate-900" %>
+    <span>&rsaquo;</span>
+    <%= link_to @product.category.name, category_products_path(@product.category.slug), class: "hover:text-slate-900" %>
+    <span>&rsaquo;</span>
+    <span class="text-slate-900 font-medium truncate max-w-xs"><%= @product.name %></span>
+  </nav>
+
+  <!-- Product Detail Section -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 bg-white p-6 sm:p-10 rounded-3xl border border-slate-200/80 shadow-sm">
+    <!-- Gallery Images -->
+    <div class="space-y-4">
+        <%= product_image_tag(@product, extra_class: "w-full h-full object-cover") %>
+
+      <% if @product.images.attached? && @product.images.count > 1 %>
+        <div class="flex space-x-3 overflow-x-auto pb-2">
+          <% @product.images.each_with_index do |img, idx| %>
+            <div class="w-20 h-20 rounded-xl overflow-hidden border-2 border-transparent hover:border-indigo-500 cursor-pointer flex-shrink-0 bg-slate-50 transition" onclick="document.getElementById('main_product_image').src = '<%= url_for(img) %>'">
+              <%= image_tag img, class: "w-full h-full object-cover" %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Product Info & Actions -->
+    <div class="flex flex-col justify-between space-y-6">
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <span class="px-3 py-1 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700">
+            <%= @product.category.name %>
+          </span>
+          <!-- Realtime Stock Badge -->
+          <%= render "products/stock_badge", product: @product %>
+        </div>
+
+        <h1 class="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-snug">
+          <%= @product.name %>
+        </h1>
+
+        <!-- Rating & Reviews count -->
+        <div class="flex items-center space-x-3 text-sm">
+          <div class="flex items-center text-amber-500 font-bold">
+            ★ <%= @product.average_rating %>
+          </div>
+          <span class="text-slate-400">&middot;</span>
+          <a href="#reviews_section" class="text-indigo-600 hover:underline">
+            <%= @product.rating_count %>件のレビュー
+          </a>
+        </div>
+
+        <!-- Price -->
+        <div class="pt-4 border-t border-slate-100">
+          <div class="text-3xl sm:text-4xl font-black text-slate-900">
+            <%= number_to_currency(@product.price, unit: "¥", precision: 0) %>
+            <span class="text-xs font-normal text-slate-500">（税込）</span>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="prose prose-sm text-slate-600 leading-relaxed pt-2">
+          <%= simple_format @product.description %>
+        </div>
+      </div>
+
+      <!-- Add to Cart Form -->
+      <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-4">
+        <% if @product.in_stock? %>
+          <%= form_with url: add_item_cart_path, method: :post, class: "space-y-3" do |f| %>
+            <%= f.hidden_field :product_id, value: @product.id %>
+            <div class="flex items-center space-x-3">
+              <label class="text-xs font-bold text-slate-700">数量:</label>
+              <%= f.select :quantity, (1..[@product.stock_quantity, 10].min).map { |n| [n, n] }, {}, class: "rounded-xl border border-slate-300 py-2 px-3 text-sm font-semibold bg-white focus:ring-2 focus:ring-indigo-500" %>
+              <%= f.submit "🛒 カートに追加する", class: "flex-1 py-3 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md hover:shadow transition cursor-pointer" %>
+            </div>
+          <% end %>
+        <% else %>
+          <div class="p-3 text-center bg-slate-200 rounded-xl text-sm font-bold text-slate-600">
+            現在在庫切れです
+          </div>
+        <% end %>
+
+        <div class="text-[11px] text-slate-400 flex items-center justify-between">
+          <span>⚡ Solid Cable: 他ユーザーの購入で在庫数がリアルタイムに更新されます</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reviews Section -->
+  <section id="reviews_section" class="bg-white p-6 sm:p-10 rounded-3xl border border-slate-200/80 shadow-sm space-y-8">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-6 border-b border-slate-100 gap-4">
+      <div>
+        <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">カスタマーレビュー</h2>
+        <div class="flex items-center space-x-2 mt-1">
+          <span class="text-2xl font-extrabold text-amber-500">★ <%= @product.average_rating %></span>
+          <span class="text-xs text-slate-500">/ 5.0 (全 <%= @product.rating_count %> 件)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Review Form (Only for logged in users) -->
+    <div id="review_form" class="p-6 rounded-2xl bg-slate-50 border border-slate-200">
+      <% if authenticated? %>
+        <h3 class="text-sm font-bold text-slate-900 mb-3">レビューを投稿する</h3>
+        <%= form_with model: [@product, @new_review], class: "space-y-4" do |f| %>
+          <div class="flex items-center space-x-3">
+            <label class="text-xs font-bold text-slate-700">評価:</label>
+            <div class="flex space-x-2">
+              <% (1..5).to_a.reverse.each do |star| %>
+                <label class="flex items-center space-x-1 cursor-pointer text-xs font-semibold">
+                  <%= f.radio_button :rating, star, checked: star == 5, class: "text-amber-500 focus:ring-amber-400" %>
+                  <span>★<%= star %></span>
+                </label>
+              <% end %>
+            </div>
+          </div>
+          <div>
+            <%= f.text_area :comment, rows: 3, placeholder: "商品の感想や使い心地を教えてください...", class: "w-full p-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 bg-white", required: true %>
+          </div>
+          <div class="flex justify-end">
+            <%= f.submit "レビューを投稿", class: "px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold cursor-pointer transition shadow-sm" %>
+          </div>
+        <% end %>
+      <% else %>
+        <div class="text-center py-4 text-xs text-slate-500">
+          レビューを投稿するには <%= link_to "ログイン", login_path, class: "text-indigo-600 font-bold hover:underline" %> が必要です。
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Review List -->
+    <div id="reviews_list" class="space-y-4 divide-y divide-slate-100">
+      <% if @reviews.empty? %>
+        <div class="py-6 text-center text-xs text-slate-400">
+          まだレビューはありません。最初のレビューを投稿してみましょう！
+        </div>
+      <% else %>
+        <% @reviews.each do |rev| %>
+          <div class="pt-4 first:pt-0 space-y-1">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2">
+                <span class="text-amber-500 font-bold text-xs">★ <%= rev.rating %></span>
+                <span class="text-xs font-bold text-slate-800"><%= rev.user.name.presence || rev.user.email_address.split("@").first %></span>
+              </div>
+              <span class="text-[11px] text-slate-400"><%= rev.created_at.strftime("%Y/%m/%d %H:%M") %></span>
+            </div>
+            <p class="text-xs text-slate-600 leading-relaxed"><%= rev.comment %></p>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </section>
+
+  <!-- Recently Viewed Products -->
+  <% if @recently_viewed_products.present? %>
+    <section class="space-y-4 pt-4 border-t border-slate-200">
+      <div class="flex items-center space-x-2">
+        <span class="text-lg">👀</span>
+        <h2 class="text-lg font-black text-slate-900 tracking-tight">他のお客様が最近チェックした商品</h2>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+        <% @recently_viewed_products.each do |product| %>
+          <%= render "products/product_card", product: product %>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+</div>

@@ -1,119 +1,175 @@
-<div class="space-y-8">
-  <!-- Top Welcome & Stats Cards (Cached with Solid Cache) -->
-  <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm">
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
-      <div>
-        <h1 class="text-2xl font-bold text-slate-800">ダッシュボード</h1>
-        <p class="text-sm text-slate-500 mt-0.5">Rails 8 + Solid Cache / Solid Queue / Hotwire Turbo 実践環境</p>
+<div class="max-w-5xl mx-auto space-y-8 py-4">
+  <!-- Welcome & Profile Header -->
+  <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+    <div class="flex items-center space-x-4">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-indigo-400 text-white flex items-center justify-center text-2xl font-black shadow-md">
+        <%= Current.user.name.present? ? Current.user.name.first : "👤" %>
       </div>
-      <div class="flex items-center gap-3">
-        <%= button_to "ジョブで集計更新 (Solid Queue)", trigger_jobs_path, method: :post, class: "inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg text-sm font-medium transition cursor-pointer" %>
+      <div>
+        <div class="flex items-center space-x-2">
+          <h1 class="text-2xl font-black text-slate-900 tracking-tight"><%= Current.user.name.presence || "マイダッシュボード" %></h1>
+          <% if Current.user.admin? %>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">Admin</span>
+          <% end %>
+        </div>
+        <p class="text-xs text-slate-500 mt-1"><%= Current.user.email_address %></p>
       </div>
     </div>
 
-    <!-- Stats Grid -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-5">
-      <div class="p-4 bg-slate-50 rounded-xl border border-slate-100">
-        <div class="text-xs font-medium text-slate-500">プロジェクト数</div>
-        <div class="text-2xl font-bold text-slate-800 mt-1"><%= @stats[:total_projects] %></div>
-      </div>
-      <div class="p-4 bg-slate-50 rounded-xl border border-slate-100">
-        <div class="text-xs font-medium text-slate-500">総タスク数</div>
-        <div class="text-2xl font-bold text-slate-800 mt-1"><%= @stats[:total_tasks] %></div>
-      </div>
-      <div class="p-4 bg-amber-50/60 rounded-xl border border-amber-100">
-        <div class="text-xs font-medium text-amber-700">未完了タスク</div>
-        <div class="text-2xl font-bold text-amber-900 mt-1"><%= @stats[:pending_tasks] %></div>
-      </div>
-      <div class="p-4 bg-emerald-50/60 rounded-xl border border-emerald-100">
-        <div class="text-xs font-medium text-emerald-700">完了タスク</div>
-        <div class="text-2xl font-bold text-emerald-900 mt-1"><%= @stats[:completed_tasks] %></div>
-      </div>
-    </div>
-    <div class="mt-3 text-right">
-      <span class="text-xs text-slate-400">
-        Solid Cache キャッシュ日時: <%= @stats[:cached_at]&.strftime("%H:%M:%S") %>
-        <% if @stats[:job_processed_at] %>
-          (ジョブ処理: <%= @stats[:job_processed_at]&.strftime("%H:%M:%S") %>)
+    <div class="flex items-center space-x-3">
+      <% if Current.user.admin? %>
+        <%= link_to admin_root_path, class: "px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-amber-300 rounded-xl text-xs font-bold border border-slate-800 shadow-sm transition flex items-center space-x-1.5" do %>
+          <span>👑</span>
+          <span>管理者バックオフィスへ</span>
         <% end %>
-      </span>
+      <% end %>
+      <%= link_to logout_path, data: { turbo_method: :delete }, class: "px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl text-xs font-bold border border-rose-200 transition" do %>
+        ログアウト
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+    <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm">
+      <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">注文回数</div>
+      <div class="text-3xl font-black text-slate-900 mt-2"><%= @total_orders_count %><span class="text-sm font-normal text-slate-400 ml-1">回</span></div>
+    </div>
+    <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm">
+      <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">累計購入金額</div>
+      <div class="text-2xl sm:text-3xl font-black text-indigo-600 mt-2 truncate"><%= number_to_currency(@total_spent, unit: "¥", precision: 0) %></div>
+    </div>
+    <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm">
+      <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">カート内商品</div>
+      <div class="text-3xl font-black text-emerald-600 mt-2"><%= @cart.total_count %><span class="text-sm font-normal text-slate-400 ml-1">点</span></div>
+    </div>
+    <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm">
+      <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">投稿レビュー</div>
+      <div class="text-3xl font-black text-amber-500 mt-2"><%= @reviews_count %><span class="text-sm font-normal text-slate-400 ml-1">件</span></div>
     </div>
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    <!-- Left Column: Projects -->
+    <!-- Left Column: Recent Orders -->
+    <div class="lg:col-span-2 space-y-4">
+      <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+          <div>
+            <h2 class="text-lg font-black text-slate-900 tracking-tight">直近のご注文</h2>
+            <p class="text-xs text-slate-500">領収書PDFのダウンロードや注文履歴の確認</p>
+          </div>
+          <%= link_to "すべて見る &rarr;".html_safe, mypage_orders_path, class: "text-xs font-bold text-indigo-600 hover:text-indigo-700" %>
+        </div>
+
+        <% if @recent_orders.empty? %>
+          <div class="py-12 text-center space-y-3">
+            <div class="text-4xl">🛍️</div>
+            <p class="text-xs text-slate-500">まだご注文履歴がありません。</p>
+            <%= link_to "商品を探す", products_path, class: "inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs transition" %>
+          </div>
+        <% else %>
+          <div class="divide-y divide-slate-100">
+            <% @recent_orders.each do |order| %>
+              <div class="py-4 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="space-y-1">
+                  <div class="flex items-center space-x-2">
+                    <span class="font-mono text-xs font-bold text-indigo-600"><%= order.order_number %></span>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase <%= order.status == 'paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-700' %>">
+                      <%= order.status %>
+                    </span>
+                  </div>
+                  <div class="text-xs text-slate-400">
+                    <%= order.created_at.strftime("%Y/%m/%d %H:%M") %> &bull; <%= order.order_items.size %> 点の商品
+                  </div>
+                  <div class="text-xs text-slate-600 line-clamp-1">
+                    <%= order.order_items.map { |i| "#{i.product&.name} x#{i.quantity}" }.join(", ") %>
+                  </div>
+                </div>
+
+                <div class="flex items-center space-x-3 self-end sm:self-auto">
+                  <div class="text-right">
+                    <div class="text-sm font-black text-slate-900"><%= number_to_currency(order.total_amount, unit: "¥", precision: 0) %></div>
+                  </div>
+                  <%= link_to receipt_order_path(order), target: "_blank", class: "px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center space-x-1" do %>
+                    <span>📄</span>
+                    <span>PDF領収書</span>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Right Column: Shortcuts & Cart -->
     <div class="space-y-6">
-      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
-        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center justify-between">
-          <span>プロジェクト</span>
-          <span class="text-xs font-normal text-slate-400">Turbo Streams 自動更新</span>
-        </h2>
-
-        <!-- New Project Form -->
-        <div class="mb-6">
-          <%= render "projects/form", project: @new_project %>
-        </div>
-
-        <!-- Project List -->
-        <div id="projects_list" class="space-y-2">
-          <% if @projects.any? %>
-            <%= render @projects %>
-          <% else %>
-            <p id="no_projects_msg" class="text-sm text-slate-400 py-4 text-center">プロジェクトはまだありません</p>
-          <% end %>
-        </div>
+      <!-- Quick Cart Preview -->
+      <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4">
+        <h3 class="font-black text-slate-900 text-sm flex items-center justify-between">
+          <span>🛒 現在のカート</span>
+          <span class="text-xs text-slate-400 font-normal"><%= @cart.total_count %> 点</span>
+        </h3>
+        <% if @cart.empty? %>
+          <p class="text-xs text-slate-400 py-4 text-center">カートは空です</p>
+        <% else %>
+          <div class="space-y-2">
+            <% @cart.items.first(3).each do |item| %>
+              <div class="flex justify-between text-xs py-1 border-b border-slate-50 last:border-0">
+                <span class="text-slate-700 truncate max-w-[160px]"><%= item.product&.name %></span>
+                <span class="font-bold text-slate-900"><%= number_to_currency(item.subtotal, unit: "¥", precision: 0) %></span>
+              </div>
+            <% end %>
+          </div>
+          <div class="pt-2 border-t border-slate-100 flex justify-between items-baseline text-xs">
+            <span class="font-bold text-slate-500">合計:</span>
+            <span class="font-black text-slate-900 text-base"><%= number_to_currency(@cart.total_amount, unit: "¥", precision: 0) %></span>
+          </div>
+          <%= link_to "カートを見る / レジに進む", cart_path, class: "block w-full text-center py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs transition" %>
+        <% end %>
       </div>
 
-      <!-- Rails 8 Tech Stack Guide Card -->
-      <div class="bg-gradient-to-br from-indigo-900 to-slate-900 text-white p-5 rounded-2xl shadow-sm">
-        <h3 class="text-base font-semibold text-indigo-200">Rails 8 注目スタック</h3>
-        <ul class="mt-3 space-y-2 text-xs text-slate-300">
-          <li class="flex items-start gap-2">
-            <span class="text-emerald-400 font-bold">✓</span>
-            <span><strong>Authentication</strong>: 標準ジェネレータで自前認証</span>
+      <!-- Quick Links -->
+      <div class="bg-slate-900 text-white rounded-3xl p-6 shadow-sm space-y-3">
+        <h3 class="font-bold text-xs text-indigo-300 uppercase tracking-wider">クイックメニュー</h3>
+        <ul class="divide-y divide-slate-800 text-xs">
+          <li class="py-2.5">
+            <%= link_to products_path, class: "flex items-center justify-between text-slate-300 hover:text-white transition" do %>
+              <span>📦 商品カタログを探す</span>
+              <span>&rarr;</span>
+            <% end %>
           </li>
-          <li class="flex items-start gap-2">
-            <span class="text-emerald-400 font-bold">✓</span>
-            <span><strong>Solid Trio</strong>: Queue / Cache / Cable をSQLiteで完結</span>
+          <li class="py-2.5">
+            <%= link_to mypage_orders_path, class: "flex items-center justify-between text-slate-300 hover:text-white transition" do %>
+              <span>📜 注文履歴・領収書一覧</span>
+              <span>&rarr;</span>
+            <% end %>
           </li>
-          <li class="flex items-start gap-2">
-            <span class="text-emerald-400 font-bold">✓</span>
-            <span><strong>Tailwind CSS v4</strong>: 高速なCSSコンパイル (tailwindcss-rails)</span>
-          </li>
-          <li class="flex items-start gap-2">
-            <span class="text-emerald-400 font-bold">✓</span>
-            <span><strong>Propshaft + Importmap</strong>: Node.jsレスな高速アセット配信</span>
-          </li>
-          <li class="flex items-start gap-2">
-            <span class="text-emerald-400 font-bold">✓</span>
-            <span><strong>Kamal 2</strong>: Dockerベースのシンプル・堅牢なデプロイ</span>
+          <li class="py-2.5">
+            <%= link_to guide_path, class: "flex items-center justify-between text-slate-300 hover:text-white transition" do %>
+              <span>⚡ Rails 8 アーキテクチャ解説</span>
+              <span>&rarr;</span>
+            <% end %>
           </li>
         </ul>
       </div>
     </div>
+  </div>
 
-    <!-- Right Column: Tasks -->
-    <div class="lg:col-span-2 space-y-6">
-      <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
-        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center justify-between">
-          <span>タスク一覧</span>
-          <span class="text-xs font-normal text-slate-400">Turbo Streams で即時反映</span>
-        </h2>
-
-        <!-- New Task Form -->
-        <div class="mb-6 bg-slate-50/70 p-4 rounded-xl border border-slate-200">
-          <%= render "tasks/form", task: @new_task, projects: @projects %>
-        </div>
-
-        <!-- Task List -->
-        <div id="tasks_list" class="divide-y divide-slate-100">
-          <% if @tasks.any? %>
-            <%= render @tasks %>
-          <% else %>
-            <p id="no_tasks_msg" class="text-sm text-slate-400 py-8 text-center">タスクはまだありません。上のフォームから追加してください。</p>
-          <% end %>
+  <!-- Recently Viewed Products (KV Store) -->
+  <% if @recently_viewed_products.present? %>
+    <section class="space-y-4 pt-4 border-t border-slate-200">
+      <div class="flex items-center space-x-2">
+        <span class="text-lg">👀</span>
+        <div>
+          <h2 class="text-base font-black text-slate-900 tracking-tight">最近チェックした商品 (KV Store)</h2>
         </div>
       </div>
-    </div>
-  </div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+        <% @recently_viewed_products.each do |product| %>
+          <%= render "products/product_card", product: product %>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
 </div>

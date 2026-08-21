@@ -1,0 +1,15 @@
+<span id="product_stock_badge_<%= product.id %>" class="inline-flex items-center space-x-1.5 transition-all">
+  <% if product.stock_quantity <= 0 %>
+    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-200 text-slate-700">
+      ✕ 在庫切れ
+    </span>
+  <% elsif product.stock_quantity <= 3 %>
+    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 animate-pulse">
+      ⚡ 残りわずか (<%= product.stock_quantity %>点)
+    </span>
+  <% else %>
+    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+      ✓ 在庫あり (<%= product.stock_quantity %>点)
+    </span>
+  <% end %>
+</span>

@@ -1,19 +1,10 @@
 class DashboardController < ApplicationController
   def index
-    @projects = Current.user.projects.order(created_at: :desc)
-    @tasks = Current.user.tasks.includes(:project).order(completed: :asc, created_at: :desc)
-    @new_task = Task.new
-    @new_project = Project.new
-
-    # Solid Cache demo: 5分キャッシュ
-    @stats = Rails.cache.fetch(Current.user.stats_cache_key, expires_in: 5.minutes) do
-      {
-        total_tasks: Current.user.tasks.count,
-        completed_tasks: Current.user.tasks.completed.count,
-        pending_tasks: Current.user.tasks.pending.count,
-        total_projects: Current.user.projects.count,
-        cached_at: Time.current
-      }
-    end
+    @recent_orders = Current.user.orders.recent.limit(5).includes(order_items: :product)
+    @total_orders_count = Current.user.orders.count
+    @total_spent = Current.user.orders.where(status: %w[paid shipped]).sum(:total_amount)
+    @reviews_count = Current.user.reviews.count
+    @cart = current_cart
+    @recently_viewed_products = current_recently_viewed.products
   end
 end

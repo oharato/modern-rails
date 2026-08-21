@@ -1,0 +1,60 @@
+<%= form_with model: [:admin, product], class: "space-y-6" do |f| %>
+  <% if product.errors.any? %>
+    <div class="p-4 bg-rose-950 border border-rose-800 rounded-2xl text-rose-200 text-xs space-y-1">
+      <div class="font-bold">エラーが発生しました:</div>
+      <ul class="list-disc list-inside">
+        <% product.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="space-y-4 bg-slate-900 p-6 rounded-3xl border border-slate-800">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <%= f.label :name, "商品名", class: "block text-xs font-bold text-slate-300 mb-1" %>
+        <%= f.text_field :name, class: "w-full p-2.5 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white focus:ring-2 focus:ring-indigo-500", required: true %>
+      </div>
+      <div>
+        <%= f.label :slug, "スラッグ (URL用識別子)", class: "block text-xs font-bold text-slate-300 mb-1" %>
+        <%= f.text_field :slug, class: "w-full p-2.5 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white focus:ring-2 focus:ring-indigo-500", required: true %>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div>
+        <%= f.label :category_id, "カテゴリ", class: "block text-xs font-bold text-slate-300 mb-1" %>
+        <%= f.collection_select :category_id, @categories, :id, :name, {}, class: "w-full p-2.5 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white focus:ring-2 focus:ring-indigo-500" %>
+      </div>
+      <div>
+        <%= f.label :price, "価格 (JPY)", class: "block text-xs font-bold text-slate-300 mb-1" %>
+        <%= f.number_field :price, min: 0, class: "w-full p-2.5 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white focus:ring-2 focus:ring-indigo-500", required: true %>
+      </div>
+      <div>
+        <%= f.label :stock_quantity, "初期在庫数", class: "block text-xs font-bold text-slate-300 mb-1" %>
+        <%= f.number_field :stock_quantity, min: 0, class: "w-full p-2.5 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white focus:ring-2 focus:ring-indigo-500", required: true %>
+      </div>
+    </div>
+
+    <div>
+      <%= f.label :description, "商品説明", class: "block text-xs font-bold text-slate-300 mb-1" %>
+      <%= f.text_area :description, rows: 4, class: "w-full p-2.5 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white focus:ring-2 focus:ring-indigo-500" %>
+    </div>
+
+    <div>
+      <%= f.label :images, "商品画像 (複数アップロード可: Active Storage)", class: "block text-xs font-bold text-slate-300 mb-1" %>
+      <%= f.file_field :images, multiple: true, accept: "image/*", class: "w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-950 file:text-indigo-400 hover:file:bg-indigo-900 cursor-pointer" %>
+    </div>
+
+    <div class="flex items-center space-x-2 pt-2">
+      <%= f.check_box :is_published, class: "rounded bg-slate-950 border-slate-700 text-indigo-600 focus:ring-indigo-500" %>
+      <%= f.label :is_published, "商品を公開する", class: "text-xs font-bold text-slate-300 cursor-pointer" %>
+    </div>
+  </div>
+
+  <div class="flex justify-end space-x-3">
+    <%= link_to "キャンセル", admin_products_path, class: "px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition" %>
+    <%= f.submit product.new_record? ? "商品を作成" : "更新を保存", class: "px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black shadow-md cursor-pointer transition" %>
+  </div>
+<% end %>

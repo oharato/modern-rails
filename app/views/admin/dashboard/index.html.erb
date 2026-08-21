@@ -1,0 +1,77 @@
+<!-- Realtime Turbo Stream Subscription for Admin Orders -->
+<%= turbo_stream_from "admin_orders" %>
+
+<div class="space-y-8">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">売上ダッシュボード</h1>
+      <p class="text-xs text-slate-400 mt-1">Solid Cable WebSocket による注文速報・売上速報リアルタイムライブ同期中</p>
+    </div>
+    <div class="flex items-center space-x-3">
+      <%= button_to admin_trigger_daily_report_path, method: :post, class: "px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md transition cursor-pointer flex items-center space-x-1.5" do %>
+        <span>⚡ 日次集計ジョブ実行</span>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <%= render "admin/dashboard/stats_summary" %>
+
+  <!-- Recent Orders Table -->
+  <div class="bg-slate-900 rounded-3xl border border-slate-800 overflow-hidden shadow-xl">
+    <div class="p-6 border-b border-slate-800 flex justify-between items-center">
+      <div>
+        <h2 class="text-lg font-bold text-white">直近の注文速報</h2>
+        <p class="text-xs text-slate-400">注文確定時に自動で先頭に追加されます（Turbo Stream）</p>
+      </div>
+      <%= link_to "全注文一覧 &rarr;".html_safe, admin_orders_path, class: "text-xs font-bold text-indigo-400 hover:text-indigo-300" %>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left">
+        <thead class="bg-slate-950/60 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-800">
+          <tr>
+            <th class="py-3 px-4">注文番号</th>
+            <th class="py-3 px-4">顧客</th>
+            <th class="py-3 px-4">金額</th>
+            <th class="py-3 px-4">ステータス</th>
+            <th class="py-3 px-4">注文日時</th>
+            <th class="py-3 px-4 text-right">操作</th>
+          </tr>
+        </thead>
+        <tbody id="recent_orders_list" class="divide-y divide-slate-800/60">
+          <% if @recent_orders.empty? %>
+            <tr>
+              <td colspan="6" class="py-8 text-center text-xs text-slate-500">注文データはまだありません。</td>
+            </tr>
+          <% else %>
+            <% @recent_orders.each do |order| %>
+              <%= render "admin/dashboard/order_row", order: order %>
+            <% end %>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Recent Job Logs -->
+  <div class="bg-slate-900 rounded-3xl border border-slate-800 p-6 shadow-xl space-y-4">
+    <div class="flex justify-between items-center">
+      <h2 class="text-base font-bold text-white">非同期ジョブ実行履歴 (Solid Queue / JobLog)</h2>
+      <%= link_to "ジョブログ一覧 &rarr;".html_safe, admin_jobs_path, class: "text-xs font-bold text-indigo-400 hover:text-indigo-300" %>
+    </div>
+    <div class="divide-y divide-slate-800">
+      <% @recent_job_logs.each do |log| %>
+        <div class="py-3 flex items-center justify-between text-xs">
+          <div class="flex items-center space-x-3">
+            <span class="px-2 py-0.5 rounded font-mono text-[10px] <%= log.status == 'completed' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : log.status == 'running' ? 'bg-amber-950 text-amber-400' : 'bg-rose-950 text-rose-400' %>">
+              <%= log.status.upcase %>
+            </span>
+            <span class="font-bold text-slate-200"><%= log.job_type %></span>
+          </div>
+          <div class="text-slate-500 font-mono text-[11px]"><%= log.created_at.strftime("%H:%M:%S") %></div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

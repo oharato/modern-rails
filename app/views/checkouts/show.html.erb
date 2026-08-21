@@ -1,0 +1,54 @@
+<div class="max-w-3xl mx-auto space-y-8">
+  <div class="text-center space-y-2">
+    <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">ご注文内容の確認</h1>
+    <p class="text-xs text-slate-500">以下の内容をご確認の上、「注文を確定する」ボタンを押してください。</p>
+  </div>
+
+  <!-- Order Items Review -->
+  <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+    <h2 class="text-lg font-black text-slate-900 border-b border-slate-100 pb-3">購入商品明細</h2>
+    <div class="divide-y divide-slate-100">
+      <% @items.each do |item| %>
+        <div class="py-3 first:pt-0 last:pb-0 flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <div class="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden flex items-center justify-center border border-slate-200">
+              <% if item.product&.images&.attached? %>
+                <%= image_tag item.product.images.first, class: "w-full h-full object-cover" %>
+              <% else %>
+                <span>📦</span>
+              <% end %>
+            </div>
+            <div>
+              <div class="font-bold text-sm text-slate-900"><%= item.product.name %></div>
+              <div class="text-xs text-slate-500"><%= number_to_currency(item.price_at_add, unit: "¥", precision: 0) %> &times; <%= item.quantity %></div>
+            </div>
+          </div>
+          <div class="font-black text-sm text-slate-900">
+            <%= number_to_currency(item.subtotal, unit: "¥", precision: 0) %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Total Amount -->
+    <div class="pt-4 border-t border-slate-200 flex justify-between items-baseline">
+      <span class="text-base font-bold text-slate-700">お支払い合計</span>
+      <span class="text-3xl font-black text-indigo-600"><%= number_to_currency(@total_amount, unit: "¥", precision: 0) %></span>
+    </div>
+  </div>
+
+  <!-- Mock Payment & Delivery Simulation Box -->
+  <div class="bg-indigo-50/70 border border-indigo-200 rounded-3xl p-6 space-y-4">
+    <div class="flex items-center space-x-2 text-indigo-900 font-bold text-sm">
+      <span>💳 モック決済シミュレーション</span>
+    </div>
+    <p class="text-xs text-indigo-800 leading-relaxed">
+      本デモ環境では実際のクレジットカード決済は行われず、注文確定と同時に即時決済完了（<code>status: 'paid'</code>）として処理されます。
+      データベーストランザクション内で在庫引き当て（排他ロック）が行われ、非同期で領収書PDF生成およびメール送信ジョブが投入されます。
+    </p>
+
+    <%= form_with url: orders_path, method: :post, class: "pt-2" do |f| %>
+      <%= f.submit "🛍️ 注文を確定する (決済実行)", class: "w-full py-4 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-base shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5 cursor-pointer" %>
+    <% end %>
+  </div>
+</div>

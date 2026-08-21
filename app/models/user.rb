@@ -1,18 +1,19 @@
 class User < ApplicationRecord
   has_secure_password
   has_many :sessions, dependent: :destroy
-
-  has_many :projects, dependent: :destroy
-  has_many :tasks, dependent: :destroy
+  has_many :orders, dependent: :destroy
+  has_many :reviews, dependent: :destroy
 
   validates :email_address, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   normalizes :email_address, with: ->(e) { e.strip.downcase }
 
-  def stats_cache_key
-    "user_#{id}_stats"
+  alias_attribute :email, :email_address
+
+  def admin?
+    role == "admin"
   end
 
-  def clear_stats_cache
-    Rails.cache.delete(stats_cache_key)
+  def customer?
+    role == "customer"
   end
 end

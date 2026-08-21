@@ -1,0 +1,18 @@
+<%= turbo_stream.prepend "reviews_list" do %>
+  <div class="pt-4 first:pt-0 space-y-1 animate-fade-in">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-2">
+        <span class="text-amber-500 font-bold text-xs">★ <%= @review.rating %></span>
+        <span class="text-xs font-bold text-slate-800"><%= @review.user.name.presence || @review.user.email_address.split("@").first %></span>
+      </div>
+      <span class="text-[11px] text-slate-400"><%= @review.created_at.strftime("%Y/%m/%d %H:%M") %></span>
+    </div>
+    <p class="text-xs text-slate-600 leading-relaxed"><%= @review.comment %></p>
+  </div>
+<% end %>
+
+<%= turbo_stream.replace "review_form" do %>
+  <div id="review_form" class="p-6 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-2">
+    <div class="text-emerald-700 font-bold text-sm">✓ レビューを投稿しました！ありがとうございます。</div>
+  </div>
+<% end %>

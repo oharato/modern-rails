@@ -7,7 +7,7 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "invalid with duplicate email" do
-    existing = users(:one)
+    existing = users(:customer)
     duplicate = User.new(email_address: existing.email_address, password: "password")
     assert_not duplicate.valid?
     assert_includes duplicate.errors[:email_address], "has already been taken"
@@ -19,8 +19,12 @@ class UserTest < ActiveSupport::TestCase
     assert_includes user.errors[:email_address], "is invalid"
   end
 
-  test "stats_cache_key helper" do
-    user = users(:one)
-    assert_equal "user_#{user.id}_stats", user.stats_cache_key
+  test "roles helper" do
+    admin = users(:admin)
+    customer = users(:customer)
+    assert admin.admin?
+    assert_not admin.customer?
+    assert customer.customer?
+    assert_not customer.admin?
   end
 end

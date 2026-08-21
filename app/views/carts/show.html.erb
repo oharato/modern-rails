@@ -1,0 +1,8 @@
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">ショッピングカート</h1>
+    <span class="text-xs font-semibold px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full">Solid Cache (KV Store)</span>
+  </div>
+
+  <%= render "carts/cart_contents", cart: @cart, items: @items %>
+</div>

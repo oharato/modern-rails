@@ -1,0 +1,42 @@
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">注文管理</h1>
+    <span class="text-xs text-slate-400">全 <%= @orders.size %> 件</span>
+  </div>
+
+  <div class="bg-slate-900 rounded-3xl border border-slate-800 overflow-hidden shadow-xl">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left">
+        <thead class="bg-slate-950/60 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-800">
+          <tr>
+            <th class="py-3 px-4">注文番号</th>
+            <th class="py-3 px-4">顧客メール</th>
+            <th class="py-3 px-4">合計金額</th>
+            <th class="py-3 px-4">ステータス変更</th>
+            <th class="py-3 px-4">注文日時</th>
+            <th class="py-3 px-4 text-right">操作</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-800">
+          <% @orders.each do |order| %>
+            <tr class="hover:bg-slate-800/40 transition">
+              <td class="py-3 px-4 font-mono text-xs font-bold text-indigo-400"><%= link_to order.order_number, admin_order_path(order) %></td>
+              <td class="py-3 px-4 text-xs text-slate-300"><%= order.user.email_address %></td>
+              <td class="py-3 px-4 text-sm font-bold text-white"><%= number_to_currency(order.total_amount, unit: "¥", precision: 0) %></td>
+              <td class="py-3 px-4">
+                <%= form_with url: update_status_admin_order_path(order), method: :patch, class: "flex items-center space-x-1" do |f| %>
+                  <%= f.select :status, [["決済完了 (paid)", "paid"], ["発送済 (shipped)", "shipped"], ["キャンセル (cancelled)", "cancelled"]], { selected: order.status }, class: "py-1 px-2 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white" %>
+                  <%= f.submit "変更", class: "px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-[10px] font-bold cursor-pointer" %>
+                <% end %>
+              </td>
+              <td class="py-3 px-4 text-xs text-slate-400"><%= order.created_at.strftime("%Y/%m/%d %H:%M") %></td>
+              <td class="py-3 px-4 text-right">
+                <%= link_to "詳細", admin_order_path(order), class: "text-xs font-bold text-indigo-400 hover:text-indigo-300" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

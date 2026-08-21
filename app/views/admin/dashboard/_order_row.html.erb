@@ -1,0 +1,14 @@
+<tr id="order_<%= order.id %>" class="border-b border-slate-800/80 hover:bg-slate-900/50 transition">
+  <td class="py-3 px-4 font-mono text-xs font-bold text-indigo-400"><%= link_to order.order_number, admin_order_path(order) %></td>
+  <td class="py-3 px-4 text-xs text-slate-300"><%= order.user.email_address %></td>
+  <td class="py-3 px-4 text-xs font-bold text-white"><%= number_to_currency(order.total_amount, unit: "¥", precision: 0) %></td>
+  <td class="py-3 px-4">
+    <span class="px-2 py-0.5 rounded text-[11px] font-bold <%= order.status == 'paid' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : order.status == 'shipped' ? 'bg-indigo-950 text-indigo-400 border border-indigo-800' : 'bg-slate-800 text-slate-400' %>">
+      <%= order.status.upcase %>
+    </span>
+  </td>
+  <td class="py-3 px-4 text-xs text-slate-400"><%= order.created_at.strftime("%m/%d %H:%M:%S") %></td>
+  <td class="py-3 px-4 text-right">
+    <%= link_to "詳細", admin_order_path(order), class: "text-xs font-bold text-slate-400 hover:text-white" %>
+  </td>
+</tr>

@@ -1,0 +1,46 @@
+<div class="space-y-6">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">非同期ジョブ監視</h1>
+      <p class="text-xs text-slate-400 mt-1">Solid Queue / JobLog 実行ログ &amp; バッチトリガー</p>
+    </div>
+    <%= button_to admin_trigger_daily_report_path, method: :post, class: "px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md transition cursor-pointer" do %>
+      ⚡ 日次売上集計ジョブ実行
+    <% end %>
+  </div>
+
+  <div class="bg-slate-900 rounded-3xl border border-slate-800 overflow-hidden shadow-xl">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left">
+        <thead class="bg-slate-950/60 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-800">
+          <tr>
+            <th class="py-3 px-4">ジョブ種別</th>
+            <th class="py-3 px-4">ステータス</th>
+            <th class="py-3 px-4">ペイロード / 結果</th>
+            <th class="py-3 px-4">開始日時</th>
+            <th class="py-3 px-4">完了日時</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-800">
+          <% if @job_logs.empty? %>
+            <tr><td colspan="5" class="py-8 text-center text-xs text-slate-500">ジョブログはありません。</td></tr>
+          <% else %>
+            <% @job_logs.each do |log| %>
+              <tr class="hover:bg-slate-800/40 transition">
+                <td class="py-3 px-4 text-xs font-bold text-white font-mono"><%= log.job_type %></td>
+                <td class="py-3 px-4">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold <%= log.status == 'completed' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : log.status == 'running' ? 'bg-amber-950 text-amber-400' : 'bg-rose-950 text-rose-400' %>">
+                    <%= log.status.upcase %>
+                  </span>
+                </td>
+                <td class="py-3 px-4 text-xs text-slate-400 font-mono max-w-xs truncate"><%= log.payload %></td>
+                <td class="py-3 px-4 text-xs text-slate-400"><%= log.created_at.strftime("%Y/%m/%d %H:%M:%S") %></td>
+                <td class="py-3 px-4 text-xs text-slate-400"><%= log.finished_at&.strftime("%Y/%m/%d %H:%M:%S") || "-" %></td>
+              </tr>
+            <% end %>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

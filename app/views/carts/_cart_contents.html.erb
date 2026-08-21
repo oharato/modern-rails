@@ -1,0 +1,99 @@
+<div id="cart_contents" class="space-y-8">
+  <% if items.empty? %>
+    <div class="bg-white p-12 rounded-3xl border border-slate-200 text-center space-y-4 shadow-sm">
+      <div class="text-5xl">🛒</div>
+      <h2 class="text-xl font-bold text-slate-800">カートに商品が入っていません</h2>
+      <p class="text-xs text-slate-500">お気に入りのクラフト商品を探してみましょう！</p>
+      <%= link_to "商品一覧へ", products_path, class: "inline-flex items-center px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md transition" %>
+    </div>
+  <% else %>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Items List -->
+      <div class="lg:col-span-2 space-y-4">
+        <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm divide-y divide-slate-100">
+          <% items.each do |item| %>
+            <div class="py-4 first:pt-0 last:pb-0 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <!-- Item Info -->
+              <div class="flex items-center space-x-4">
+                <div class="w-16 h-16 rounded-xl bg-slate-100 overflow-hidden flex-shrink-0 flex items-center justify-center border border-slate-200">
+                  <% if item.product&.images&.attached? %>
+                    <%= image_tag item.product.images.first, class: "w-full h-full object-cover" %>
+                  <% else %>
+                    <span class="text-2xl">📦</span>
+                  <% end %>
+                </div>
+                <div>
+                  <%= link_to product_path(item.product.slug), class: "font-bold text-sm text-slate-900 hover:text-indigo-600 line-clamp-1" do %>
+                    <%= item.product.name %>
+                  <% end %>
+                  <div class="text-xs text-slate-500">
+                    単価: <%= number_to_currency(item.price_at_add, unit: "¥", precision: 0) %>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quantity Controls & Actions -->
+              <div class="flex items-center justify-between sm:justify-end w-full sm:w-auto space-x-4">
+                <div class="flex items-center space-x-2">
+                  <%= button_to update_item_cart_path(item.product_id, quantity: item.quantity - 1), method: :patch, class: "w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-sm transition cursor-pointer" do %>
+                    -
+                  <% end %>
+                  <span class="w-8 text-center font-bold text-sm text-slate-800"><%= item.quantity %></span>
+                  <%= button_to update_item_cart_path(item.product_id, quantity: item.quantity + 1), method: :patch, class: "w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-sm transition cursor-pointer" do %>
+                    +
+                  <% end %>
+                </div>
+
+                <div class="text-right min-w-[80px]">
+                  <div class="font-extrabold text-sm text-slate-900">
+                    <%= number_to_currency(item.subtotal, unit: "¥", precision: 0) %>
+                  </div>
+                </div>
+
+                <%= button_to remove_item_cart_path(item.product_id), method: :delete, class: "text-slate-400 hover:text-rose-600 transition p-1 cursor-pointer" do %>
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+
+        <div class="flex justify-between items-center px-2">
+          <%= link_to "&larr; 買い物を続ける".html_safe, products_path, class: "text-xs font-bold text-slate-600 hover:text-indigo-600" %>
+          <%= button_to "カートを空にする", clear_cart_path, method: :delete, data: { turbo_confirm: "カート内のすべての商品を削除しますか？" }, class: "text-xs text-rose-500 hover:text-rose-700 font-medium cursor-pointer" %>
+        </div>
+      </div>
+
+      <!-- Order Summary Card -->
+      <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm h-fit space-y-6">
+        <h3 class="font-black text-lg text-slate-900 border-b border-slate-100 pb-3">注文サマリー</h3>
+        <div class="space-y-2 text-sm text-slate-600">
+          <div class="flex justify-between">
+            <span>商品点数</span>
+            <span class="font-bold text-slate-900"><%= cart.total_count %> 点</span>
+          </div>
+          <div class="flex justify-between">
+            <span>送料</span>
+            <span class="text-emerald-600 font-bold">無料 (キャンペーン)</span>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-slate-100 flex justify-between items-baseline">
+          <span class="text-base font-bold text-slate-900">合計金額</span>
+          <span class="text-2xl font-black text-indigo-600"><%= number_to_currency(cart.total_amount, unit: "¥", precision: 0) %></span>
+        </div>
+
+        <div>
+          <%= link_to checkout_path, class: "w-full block py-4 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-center shadow-md hover:shadow-lg transition transform hover:-translate-y-0.5" do %>
+            レジに進む（購入手続き）&rarr;
+          <% end %>
+        </div>
+
+        <div class="p-3 bg-slate-50 rounded-xl text-[11px] text-slate-500 space-y-1">
+          <p>🔒 ゲストカートは <strong>Solid Cache (KV)</strong> で7日間保存されます。</p>
+          <p>🔑 ログインすると会員カートへ自動統合されます。</p>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
