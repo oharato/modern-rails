@@ -5,7 +5,8 @@
 最新の **Ruby on Rails 8**、**SQLite 3**、**Solid Trio (Solid Queue, Solid Cache, Solid Cable)**、**Tailwind CSS v4** をフル活用した本格的モダンECアプリケーションです。
 
 > 📖 **詳細設計書**: [docs/craft_commerce_specification.md](file:///home/oharato/workspace/modern-rails/docs/craft_commerce_specification.md)  
-> 📖 **デプロイ手順書 (Kamal 2 & Pulumi)**: [DEPLOYMENT.md](file:///home/oharato/workspace/modern-rails/DEPLOYMENT.md)
+> 📊 **実装振り返り・技術比較レポート**: [docs/IMPLEMENTATION_REPORT.md](file:///home/oharato/workspace/modern-rails/docs/IMPLEMENTATION_REPORT.md)  
+> 🚀 **デプロイ手順書 (Kamal 2 & Pulumi)**: [DEPLOYMENT.md](file:///home/oharato/workspace/modern-rails/DEPLOYMENT.md)
 
 ---
 
@@ -16,12 +17,13 @@
 | **商品カタログ / SSR** | SEO & 超高速レンダリング | Hotwire (Turbo Drive + Morphing) |
 | **商品データ & 注文** | ユーザー、商品、在庫、注文トランザクション | SQLite 3 + ActiveRecord (排他ロック `lock!`) |
 | **カート & 閲覧履歴** | ゲスト/会員の高速カート保持、自動マージ | `Solid Cache` (Key-Value Store) |
-| **画像 & 領収書PDF** | ギャラリー画像、購入後のPDF領収書保管 | Active Storage + `prawn` gem |
+| **画像 & 領収書PDF** | ギャラリー画像、購入後のPDF領収書保管 | Active Storage + `prawn` gem (Noto Sans JP) |
 | **非同期処理** | 注文確認メール、PDF生成、日次集計バッチ | `Solid Queue` + Active Job (`JobLog` 記録) |
 | **カタログキャッシュ** | トップ・商品一覧の60秒キャッシュ配信 | `Solid Cache` (`Rails.cache.fetch`) |
 | **在庫ライブ同期** | 残り在庫数のリアルタイム更新、管理者注文速報 | `Solid Cable` + Turbo Streams |
 | **認証 & 権限** | 一般顧客アカウント & 管理者 (Admin) ダッシュボード | Rails 8 組み込み認証 + Role制御 |
 | **DB管理・運用** | 在庫確認、クエリチューニング、データ保守 | Harlequin TUI (`.harlequin.toml`) |
+| **品質保証 & CI** | 静的解析・セキュリティ・自動テスト・Linter | Brakeman + Importmap Audit + RuboCop + Minitest |
 | **デプロイ・インフラ** | 本番稼働構成 | Kamal 2 + Pulumi (GCP) |
 
 ---
@@ -38,7 +40,8 @@ docker compose up -d
 ```
 
 ### 2. ブラウザでアクセス
-- 顧客向けフロント: **`http://localhost:3000`**
+- 顧客向けフロント: **`http://localhost:3000`** (または LAN から **`http://nuc7.local:3000`**)
+- 顧客マイダッシュボード: **`http://localhost:3000/dashboard`**
 - 管理者ダッシュボード: **`http://localhost:3000/admin`**
 - 学習・アーキテクチャガイド: **`http://localhost:3000/guide`**
 
@@ -72,7 +75,7 @@ docker compose up -d
 
 ### 4. 非同期ジョブ & 領収書PDF (Solid Queue + Prawn)
 - 注文完了時に `OrderConfirmationMailJob` と `ReceiptGenerationJob` を非同期投入。
-- Prawn により PDF 領収書をバイナリ生成し、Active Storage に添付・保存。
+- Prawn + `vendor/fonts/NotoSansJP.ttf` により完全な日本語レイアウトの PDF 領収書をバイナリ生成し、Active Storage に添付・保存。
 - ユーザーはマイページ (`/mypage/orders`) から領収書PDFをストリーミングダウンロード可能。
 - ジョブ実行状況は `JobLog` テーブルに記録され、`/admin/jobs` で監視可能。
 
@@ -90,14 +93,40 @@ docker compose up -d
 
 ---
 
+## 🧪 テスト & CI（継続的インテグレーション）
+
+### 🚀 Push 前のローカル CI 一括検証 (推奨)
+GitHub Actions の CI パイプラインと同じ 4 つの検証ステップ（セキュリティ診断、JS監査、Linter、全テスト）をローカルで一括実行できます：
+
+```bash
+docker compose run --rm web bin/ci
+```
+
+#### 実行内容:
+1. 🔍 **Brakeman**: Rails セキュリティ脆弱性の静的解析 (`bin/brakeman --no-pager`)
+2. 🔒 **Importmap Audit**: JavaScript 依存パッケージの脆弱性診断 (`bin/importmap audit`)
+3. 🧹 **RuboCop**: コード規約・スタイルチェック (`bin/rubocop`)
+4. 🧪 **Minitest**: 単体・統合・画面スモークテスト一括実行 (`bin/rails db:test:prepare test test:system`)
+
+---
+
 ## 📋 よく使う開発コマンド集
 
 ```bash
-# テストの実行 (全30テスト・117アサーション)
+# Push 前のローカル CI 一括チェック (Brakeman + RuboCop + テスト)
+docker compose run --rm web bin/ci
+
+# テストスイート単体実行 (全37テスト・139アサーション)
 docker compose run --rm web bin/rails test
+
+# RuboCop によるコードスタイル自動修正
+docker compose run --rm web bin/rubocop -A
 
 # DBシードの再投入
 docker compose run --rm web bin/rails db:seed
+
+# キャッシュクリア
+docker compose run --rm web bin/rails runner "Rails.cache.clear"
 
 # Tailwind CSSのビルド
 docker compose run --rm web bin/rails tailwindcss:build
@@ -105,6 +134,6 @@ docker compose run --rm web bin/rails tailwindcss:build
 # Railsコンソール
 docker compose run --rm web bin/rails console
 
-# Harlequin TUI でSQLiteを操作
+# Harlequin TUI で SQLite をグラフィカルに操作
 harlequin
 ```
