@@ -75,3 +75,4 @@ jobs:
           SERVER_IP: ${{ secrets.SERVER_IP || '34.27.174.205' }}
         run: |
           kamal redeploy || kamal deploy
+          kamal app exec --reuse "bin/rails db:prepare"

@@ -1,16 +1,16 @@
 # Seed script for CraftCommerce
 
 puts "Clearing existing data..."
-Review.destroy_all
-OrderItem.destroy_all
-Order.destroy_all
-Product.destroy_all
-Category.destroy_all
-Task.destroy_all rescue nil
-Project.destroy_all rescue nil
-Session.destroy_all
-User.destroy_all
-JobLog.destroy_all
+ActiveRecord::Base.connection.disable_referential_integrity do
+  [
+    Review, OrderItem, Order, ProductImage, Product, Category,
+    Session, User, JobLog
+  ].each(&:delete_all)
+
+  %w[tasks projects].each do |tbl|
+    ActiveRecord::Base.connection.execute("DELETE FROM #{tbl}") if ActiveRecord::Base.connection.table_exists?(tbl)
+  end
+end
 
 puts "Creating Accounts..."
 admin = User.create!(
