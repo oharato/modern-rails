@@ -100,11 +100,11 @@ class ReceiptGenerationJob < ApplicationJob
     # Total Box
     formatted_total = order.total_amount.to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse
     pdf.fill_color "F3F4F6"
-    pdf.fill_rectangle [0, pdf.cursor], pdf.bounds.width, 42
+    pdf.fill_rectangle [ 0, pdf.cursor ], pdf.bounds.width, 42
     pdf.fill_color "111827"
-    
+
     total_label = has_jp_font ? "領収金額:  ¥#{formatted_total} (税込・決済完了)" : "Total Amount: JPY #{formatted_total} (PAID IN FULL)"
-    pdf.text_box total_label, at: [14, pdf.cursor - 13], size: 15, style: :bold
+    pdf.text_box total_label, at: [ 14, pdf.cursor - 13 ], size: 15, style: :bold
 
     pdf.move_down 60
 

@@ -135,14 +135,14 @@ def generate_product_svg(title, category_name, color1, color2)
 end
 
 colors = [
-  ["#4f46e5", "#818cf8"],
-  ["#d97706", "#f59e0b"],
-  ["#059669", "#10b981"],
-  ["#dc2626", "#f87171"],
-  ["#7c3aed", "#a78bfa"],
-  ["#2563eb", "#60a5fa"],
-  ["#b45309", "#d97706"],
-  ["#475569", "#64748b"]
+  [ "#4f46e5", "#818cf8" ],
+  [ "#d97706", "#f59e0b" ],
+  [ "#059669", "#10b981" ],
+  [ "#dc2626", "#f87171" ],
+  [ "#7c3aed", "#a78bfa" ],
+  [ "#2563eb", "#60a5fa" ],
+  [ "#b45309", "#d97706" ],
+  [ "#475569", "#64748b" ]
 ]
 
 products = products_data.each_with_index.map do |data, idx|

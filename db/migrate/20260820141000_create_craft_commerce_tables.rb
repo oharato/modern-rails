@@ -69,7 +69,7 @@ class CreateCraftCommerceTables < ActiveRecord::Migration[8.1]
 
       t.timestamps
     end
-    add_index :reviews, [:user_id, :product_id]
+    add_index :reviews, [ :user_id, :product_id ]
 
     # Job Logs
     create_table :job_logs do |t|

@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -e
+
+echo "========================================="
+echo "🚀 Running Local CI Checks (Pre-Push)"
+echo "========================================="
+
+echo ""
+echo "🔍 [1/4] Running Brakeman (Security Scan)..."
+bin/brakeman --no-pager
+
+echo ""
+echo "🔒 [2/4] Running Importmap Audit (JS Dependencies)..."
+bin/importmap audit
+
+echo ""
+echo "🧹 [3/4] Running RuboCop (Linter & Style Check)..."
+bin/rubocop
+
+echo ""
+echo "🧪 [4/4] Running Test Suite (Unit, Integration, System)..."
+RAILS_ENV=test bin/rails db:test:prepare test test:system
+
+echo ""
+echo "========================================="
+echo "🎉 ALL LOCAL CI CHECKS PASSED SUCCESSFULLY!"
+echo "========================================="
