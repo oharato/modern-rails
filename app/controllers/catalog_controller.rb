@@ -5,8 +5,8 @@ class CatalogController < ApplicationController
     # 60-second edge/server catalog cache
     @catalog_data = Rails.cache.fetch("catalog_top", expires_in: 60.seconds) do
       {
-        featured_products: Product.published.featured.includes(:category).to_a,
-        recent_products: Product.published.recent.includes(:category).to_a,
+        featured_products: Product.published.featured.includes(:category).with_attached_images.to_a,
+        recent_products: Product.published.recent.includes(:category).with_attached_images.to_a,
         categories: Category.all.to_a
       }
     end

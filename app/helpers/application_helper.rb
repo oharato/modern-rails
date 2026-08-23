@@ -14,7 +14,7 @@ module ApplicationHelper
     if product.images.attached?
       # Use relative path so it works across any hostname (e.g. nuc7.local, localhost, IP address)
       blob_url = rails_storage_proxy_path(product.images.first, only_path: true)
-      image_tag blob_url, class: extra_class, alt: product.name, loading: "lazy"
+      image_tag blob_url, class: extra_class, alt: product.name, loading: "lazy", decoding: "async", width: 400, height: 400
     else
       dummy_product_svg(product, extra_class)
     end

@@ -7,7 +7,7 @@ class ProductsController < ApplicationController
 
     cache_key = "catalog_products_#{@category_slug}_#{@query}"
     @products = Rails.cache.fetch(cache_key, expires_in: 60.seconds) do
-      scope = Product.published.includes(:category).order(created_at: :desc)
+      scope = Product.published.includes(:category).with_attached_images.order(created_at: :desc)
       if @category_slug.present?
         scope = scope.joins(:category).where(categories: { slug: @category_slug })
       end
@@ -24,7 +24,7 @@ class ProductsController < ApplicationController
   end
 
   def show
-    @product = Product.published.includes(:category).find_by!(slug: params[:slug])
+    @product = Product.published.includes(:category).with_attached_images.find_by!(slug: params[:slug])
     @reviews = @product.reviews.recent.includes(:user)
     @new_review = Review.new
 

@@ -13,7 +13,7 @@
       <div class="flex items-center justify-between mb-1">
         <%= render "products/stock_badge", product: product %>
         <% if product.rating_count > 0 %>
-          <span class="text-xs font-medium text-amber-500 flex items-center">
+          <span class="text-xs font-medium text-amber-700 flex items-center">
             ★ <%= product.average_rating %> <span class="text-slate-600 text-[10px] ml-0.5">(<%= product.rating_count %>)</span>
           </span>
         <% end %>
