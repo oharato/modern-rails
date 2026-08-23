@@ -10,7 +10,7 @@ class ApplicationController < ActionController::Base
   private
 
   def basic_auth_enabled?
-    ENV["BASIC_AUTH_USER"].present? && ENV["BASIC_AUTH_PASSWORD"].present?
+    ENV["ENABLE_BASIC_AUTH"] == "true" && ENV["BASIC_AUTH_USER"].present? && ENV["BASIC_AUTH_PASSWORD"].present?
   end
 
   def authenticate_with_basic_auth

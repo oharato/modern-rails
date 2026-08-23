@@ -43,8 +43,6 @@ registry:
 env:
   secret:
     - RAILS_MASTER_KEY
-    - BASIC_AUTH_USER
-    - BASIC_AUTH_PASSWORD
   clear:
     RAILS_ENV: production
     SOLID_QUEUE_IN_PUMA: true
