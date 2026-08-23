@@ -6,7 +6,21 @@
 
 > 📖 **詳細設計書**: [docs/craft_commerce_specification.md](file:///home/oharato/workspace/modern-rails/docs/craft_commerce_specification.md)  
 > 📊 **実装振り返り・技術比較レポート**: [docs/IMPLEMENTATION_REPORT.md](file:///home/oharato/workspace/modern-rails/docs/IMPLEMENTATION_REPORT.md)  
-> 🚀 **デプロイ手順書 (Kamal 2 & Pulumi)**: [DEPLOYMENT.md](file:///home/oharato/workspace/modern-rails/DEPLOYMENT.md)
+> ⚡️ **Lighthouse 監査 & パフォーマンス最適化**: [docs/LIGHTHOUSE_OPTIMIZATION.md](file:///home/oharato/workspace/modern-rails/docs/LIGHTHOUSE_OPTIMIZATION.md)  
+> 🚀 **デプロイ手順書 (Kamal 2 & Pulumi)**: [DEPLOYMENT.md](file:///home/oharato/workspace/modern-rails/DEPLOYMENT.md) / [docs/DEPLOYMENT_SPEED_OPTIMIZATION.md](file:///home/oharato/workspace/modern-rails/docs/DEPLOYMENT_SPEED_OPTIMIZATION.md)
+
+---
+
+## 🌐 本番稼働環境 & Lighthouse スコア
+
+- **本番 URL**: [`https://modern-rails.ohchans.com/`](https://modern-rails.ohchans.com/)
+- **Lighthouse スコア（Desktop 実測値）**:
+  - ⚡️ **Performance**: **98 点** 🟢
+  - ♿️ **Accessibility**: **100 点** 🟢 (満点)
+  - 🔍 **SEO**: **100 点** 🟢 (満点)
+  - 🛡️ **Best Practices**: **77 点** 🟠
+- **Core Web Vitals**:
+  - **CLS**: `0` (ズレゼロ) / **TBT**: `40ms` (低遅延) / **FCP**: `0.8s` / **LCP**: `0.9s`
 
 ---
 
