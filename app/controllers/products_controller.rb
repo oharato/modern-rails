@@ -2,6 +2,8 @@ class ProductsController < ApplicationController
   allow_unauthenticated_access
 
   def index
+    expires_in 60.seconds, public: true unless authenticated?
+
     @category_slug = params[:category] || params[:slug]
     @query = params[:query]
 

@@ -2,6 +2,8 @@ class CatalogController < ApplicationController
   allow_unauthenticated_access
 
   def index
+    expires_in 60.seconds, public: true unless authenticated?
+
     # 60-second edge/server catalog cache
     @catalog_data = Rails.cache.fetch("catalog_top", expires_in: 60.seconds) do
       {
