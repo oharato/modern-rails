@@ -15,12 +15,12 @@
 
 - **本番 URL**: [`https://modern-rails.ohchans.com/`](https://modern-rails.ohchans.com/)
 - **Lighthouse スコア（Desktop 実測値）**:
-  - ⚡️ **Performance**: **98 点** 🟢
-  - ♿️ **Accessibility**: **100 点** 🟢 (満点)
+  - ⚡️ **Performance**: **96〜99 点** 🟢
+  - ♿️ **Accessibility**: **95〜100 点** 🟢
   - 🔍 **SEO**: **100 点** 🟢 (満点)
-  - 🛡️ **Best Practices**: **77 点** 🟠
+  - 🛡️ **Best Practices**: **81 点** 🟢
 - **Core Web Vitals**:
-  - **CLS**: `0` (ズレゼロ) / **TBT**: `40ms` (低遅延) / **FCP**: `0.8s` / **LCP**: `0.9s`
+  - **CLS**: `0` (ズレゼロ) / **TBT**: `0〜70ms` (極低遅延) / **FCP**: `0.6s` / **LCP**: `0.6s`
 
 ---
 
