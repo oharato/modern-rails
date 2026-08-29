@@ -10,9 +10,9 @@
     "destroy": "pulumi destroy --yes"
   },
   "dependencies": {
-    "@pulumi/cloudflare": "^6.19.0",
+    "@pulumi/cloudflare": "^6.20.0",
     "@pulumi/gcp": "^8.18.0",
-    "@pulumi/pulumi": "^3.150.0"
+    "@pulumi/pulumi": "^3.259.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
